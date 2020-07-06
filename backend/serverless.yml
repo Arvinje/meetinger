@@ -1,0 +1,60 @@
+service: minutes
+
+frameworkVersion: "=1.74.1"
+
+package:
+  individually: true
+  exclude:
+   - ./**
+
+custom:
+  webpack:
+    packager: yarn
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  serverless-iam-roles-per-function:
+    defaultInherit: true
+  prune:
+    automatic: true
+    number: 3
+
+plugins:
+  - serverless-webpack
+  - serverless-iam-roles-per-function
+  - serverless-prune-plugin
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ${opt:region, 'eu-central-1'}
+  stage: ${opt:stage, 'dev'}
+
+  logs:
+    websocket:
+      level: INFO
+
+  tracing:
+    apiGateway: true
+    lambda: true
+
+  stackTags:
+    Service: ${self:service}
+    Stage: ${self:provider.stage}
+    Region: ${self:provider.region}
+    Version: ${file(./package.json):version}
+    Project: minutes
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTraceSegments
+        - xray:PutTelemetryRecords
+      Resource: "*"
+
+functions:
+  hello:
+    handler: src/handler.hello
+    events:
+      - websocket: 
+          route: hello
+          routeResponseSelectionExpression: $default
