@@ -16,6 +16,7 @@
   "rules": {
     "import/no-unresolved": [2, {"commonjs": true, "amd": true}],
     "import/prefer-default-export": "off",
+    "import/extensions": "off",
     "max-len": ["error", {
       "code":  150,
       "ignoreComments":  true,

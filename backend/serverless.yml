@@ -52,9 +52,17 @@ provider:
       Resource: "*"
 
 functions:
-  hello:
-    handler: src/handler.hello
+  WebsocketAuth:
+    handler: src/handlers/authorizer/wsHandler.handle
+    environment:
+      ISS: ${ssm:/cognito-user-pool/minutes/iss~true}
+
+  WebsocketConnect:
+    handler: src/handlers/websockets/connect.handle
     events:
       - websocket: 
-          route: hello
-          routeResponseSelectionExpression: $default
+          route: $connect
+          authorizer: 
+            name: WebsocketAuth
+            identitySource:
+              - 'route.request.querystring.Auth'
