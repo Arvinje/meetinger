@@ -21,8 +21,9 @@ type JWK = {
 
 type JWTPayload = {
   sub: string;
-  name: string;
+  username: string;
   iat: number;
+  exp: number;
 }
 
 // Fetches JsonWebKeys of the `iss`

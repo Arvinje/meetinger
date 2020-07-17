@@ -8,6 +8,8 @@ package:
    - ./**
 
 custom:
+  mainTableArn: ${ssm:/dynamodb/minutes/main_table_arn~true}
+  mainTableName: ${ssm:/dynamodb/minutes/main_table_name~true}
   webpack:
     packager: yarn
     webpackConfig: ./webpack.config.js
@@ -50,6 +52,17 @@ provider:
         - xray:PutTraceSegments
         - xray:PutTelemetryRecords
       Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - ${self:custom.mainTableArn}
+        - Fn::Join:
+          - "/"
+          -
+            - ${self:custom.mainTableArn}
+            - "index/*"
+
 
 functions:
   WebsocketAuth:
@@ -66,3 +79,5 @@ functions:
             name: WebsocketAuth
             identitySource:
               - 'route.request.querystring.Auth'
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}

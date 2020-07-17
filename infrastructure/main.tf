@@ -143,3 +143,25 @@ resource "aws_dynamodb_table" "main" {
     Project = var.project_name
   }
 }
+
+resource "aws_ssm_parameter" "main_table_arn" {
+  name        = "/dynamodb/${var.project_name}/main_table_arn"
+  description = "The Main table's ARN"
+  type        = "SecureString"
+  value       = aws_dynamodb_table.main.arn
+
+  tags = {
+    Project = var.project_name
+  }
+}
+
+resource "aws_ssm_parameter" "main_table_name" {
+  name        = "/dynamodb/${var.project_name}/main_table_name"
+  description = "The Main table's name"
+  type        = "SecureString"
+  value       = "minutes-main"
+
+  tags = {
+    Project = var.project_name
+  }
+}

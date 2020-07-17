@@ -28,6 +28,9 @@ export async function handle(event: CustomAuthorizerEvent): Promise<AuthResponse
           },
         ],
       },
+      context: {
+        username: decoded.username,
+      },
     };
   } catch (error) {
     throw new AuthError(error, 'Unauthorized');
