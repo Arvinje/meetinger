@@ -13,7 +13,9 @@ custom:
   webpack:
     packager: yarn
     webpackConfig: ./webpack.config.js
-    includeModules: true
+    includeModules:
+      forceExclude:
+        - aws-sdk
   serverless-iam-roles-per-function:
     defaultInherit: true
   prune:
