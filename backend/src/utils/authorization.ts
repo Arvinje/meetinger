@@ -28,8 +28,12 @@ type JWTPayload = {
 
 // Fetches JsonWebKeys of the `iss`
 export async function fetchJWKs(): Promise<void> {
-  const jwks = await axios.get(`${iss}/.well-known/jwks.json`)
-    .catch((err) => { throw new AxiosError(err); });
+  const jwksUrl = `${iss}/.well-known/jwks.json`;
+  const jwks = await axios.get(jwksUrl)
+    .catch((err) => {
+      throw new AxiosError(err, 'cannot access JWKs at "%s"', jwksUrl);
+    });
+
   jwks.data.keys.forEach((k: JWK) => {
     const jwkArray: jwkToPem.JWK = {
       kty: k.kty,
@@ -50,17 +54,17 @@ export function validateToken(token: string, pems: JWKPems): JWTPayload {
   };
 
   if (!decodedJwt) {
-    throw new ValidationError(Error('invalid JWT token'));
+    throw new ValidationError('invalid JWT token');
   }
 
   // Fail if token is not from your UserPool
   if (decodedJwt.payload.iss !== iss) {
-    throw new ValidationError(Error('invalid issuer'));
+    throw new ValidationError('invalid issuer');
   }
 
   // Reject the jwt if it's not an 'Access Token'
   if (decodedJwt.payload.token_use !== 'access') {
-    throw new ValidationError(Error('not an access token'));
+    throw new ValidationError('not an access token');
   }
 
   // Get the kid from the token and retrieve corresponding PEM
@@ -68,7 +72,7 @@ export function validateToken(token: string, pems: JWKPems): JWTPayload {
 
   const pem = pems[kid];
   if (!pem) {
-    throw new ValidationError(Error('invalid access token'));
+    throw new ValidationError('invalid access token');
   }
 
   try {

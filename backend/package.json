@@ -10,12 +10,14 @@
     "remove": "serverless remove"
   },
   "dependencies": {
+    "@types/verror": "^1.10.4",
     "aws-lambda": "^1.0.6",
     "aws-sdk": "^2.709.0",
     "axios": "^0.19.2",
     "jsonwebtoken": "^8.5.1",
     "jwk-to-pem": "^2.0.4",
-    "source-map-support": "^0.5.19"
+    "source-map-support": "^0.5.19",
+    "verror": "^1.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.10.4",

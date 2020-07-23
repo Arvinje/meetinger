@@ -1,15 +1,29 @@
 /* eslint-disable max-classes-per-file */
-export class AppError extends Error {
-    cause: Error;
+import { VError } from 'verror';
 
-    constructor(cause: Error, message = '') {
-      super(message);
-      this.cause = cause;
-    }
+// App-wide error object
+export class AppError extends VError {
+  public name = 'AppError';
 }
 
-export class ValidationError extends AppError {}
-export class DynamoDBError extends AppError {}
-export class AxiosError extends AppError {}
-export class AuthError extends AppError {}
-export class NotFoundError extends AppError {}
+// Main error classes, they roughly correlate to one or multiple HTTP status codes
+export class UnAuthorizedError extends AppError { // 401
+  public name = 'UnAuthorizedError';
+}
+export class NotFoundError extends AppError { // 404
+  public name = 'NotFoundError';
+}
+export class InternalError extends AppError { // 5**
+  public name = 'InternalError';
+}
+export class ValidationError extends AppError { // 422 or 400
+  public name = 'ValidationError';
+}
+
+// External resources errors
+export class DynamoDBError extends InternalError {
+  public name = 'DynamoDBError';
+}
+export class AxiosError extends InternalError {
+  public name = 'AxiosError';
+}

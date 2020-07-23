@@ -29,7 +29,9 @@ export const handle: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent
       TableName: MainTable,
       Item: newConnectionItem,
     }).promise()
-      .catch((error) => { throw new DynamoDBError(error, 'failed to put connection item'); });
+      .catch((error) => {
+        throw new DynamoDBError(error, 'failed to put new connection item');
+      });
 
     return {
       statusCode: 200,
@@ -37,7 +39,7 @@ export const handle: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent
     };
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error(error);
+    console.log(error);
 
     return {
       statusCode: 500,
