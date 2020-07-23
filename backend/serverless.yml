@@ -83,3 +83,11 @@ functions:
               - 'route.request.querystring.Auth'
     environment:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
+  
+  WebsocketDisconnect:
+    handler: src/handlers/websockets/disconnect.handle
+    events:
+      - websocket: 
+          route: $disconnect
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}
