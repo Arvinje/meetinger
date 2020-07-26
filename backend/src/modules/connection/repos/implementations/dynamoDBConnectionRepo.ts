@@ -1,6 +1,6 @@
 import DynamoDB, { PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb';
-import { ConnectionRepo } from '@src/modules/connection/repos/connectionRepo';
-import { Connection } from '@src/modules/connection/domain/connection';
+import { ConnectionRepo } from '@connection/repos/connectionRepo';
+import { Connection } from '@connection/domain/connection';
 import { DDBConfigProps, DDBTables } from '@src/shared/infra/dynamodb/dynamodb';
 import { DynamoDBError } from '@src/utils/errors';
 

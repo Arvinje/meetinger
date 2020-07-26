@@ -34,6 +34,7 @@
       "alias": {
         "map": [
           ["@src", "./src"],
+          ["@connection", "./src/modules/connection"],
           ["@tests", "./tests"]
         ],
         "extensions": [

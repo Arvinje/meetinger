@@ -1,8 +1,8 @@
 import { Ok, Err } from '@hqoss/monads';
 import { DynamoDBError } from '@src/utils/errors';
 import { UseCase } from '@src/shared/core/useCase';
-import { ConnectionRepo } from '@src/modules/connection/repos/connectionRepo';
-import { Connection } from '@src/modules/connection/domain/connection';
+import { ConnectionRepo } from '@connection/repos/connectionRepo';
+import { Connection } from '@connection/domain/connection';
 import { CreateConnectionDTO } from './createConnectionDTO';
 import { Response } from './createConnectionResponse';
 

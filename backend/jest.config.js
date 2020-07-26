@@ -9,6 +9,7 @@ module.exports = {
     '^@clients/(.*)$': '<rootDir>/src/clients/$1',
     '^@transformers/(.*)$': '<rootDir>/src/transformers/$1',
     '^@src/(.*)$': '<rootDir>/src/$1',
+    '^@connection/(.*)$': '<rootDir>/src/modules/connection/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
 };

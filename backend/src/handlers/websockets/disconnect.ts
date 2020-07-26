@@ -1,9 +1,9 @@
 import 'source-map-support/register';
 import { APIGatewayProxyHandler, APIGatewayProxyResult, APIGatewayProxyEvent } from 'aws-lambda';
 import DDBConfig from '@src/shared/infra/dynamodb/dynamodb';
-import { DynamoDBConnectionRepo } from '@src/modules/connection/repos/implementations/dynamoDBConnectionRepo';
-import { DeleteConnectionUseCase } from '@src/modules/connection/usecase/deleteConnection/deleteConnectionUseCase';
-import { DeleteConnectionDTO } from '@src/modules/connection/usecase/deleteConnection/deleteConnectionDTO';
+import { DynamoDBConnectionRepo } from '@connection/repos/implementations/dynamoDBConnectionRepo';
+import { DeleteConnectionUseCase } from '@connection/usecase/deleteConnection/deleteConnectionUseCase';
+import { DeleteConnectionDTO } from '@connection/usecase/deleteConnection/deleteConnectionDTO';
 
 const connectionRepo = new DynamoDBConnectionRepo(DDBConfig);
 const connectionUseCase = new DeleteConnectionUseCase(connectionRepo);

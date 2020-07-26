@@ -1,7 +1,7 @@
 import { UseCase } from '@src/shared/core/useCase';
 import { Ok, Err } from '@hqoss/monads';
 import { DynamoDBError } from '@src/utils/errors';
-import { ConnectionRepo } from '@src/modules/connection/repos/connectionRepo';
+import { ConnectionRepo } from '@connection/repos/connectionRepo';
 import { Response } from './deleteConnectionResponse';
 import { DeleteConnectionDTO } from './deleteConnectionDTO';
 

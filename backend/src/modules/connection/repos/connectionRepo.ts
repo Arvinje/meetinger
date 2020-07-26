@@ -1,4 +1,4 @@
-import { Connection } from '@src/modules/connection/domain/connection';
+import { Connection } from '@connection/domain/connection';
 
 export interface ConnectionRepo {
   create(connection: Connection): Promise<void>;
