@@ -1,40 +1,30 @@
 import 'source-map-support/register';
 import { APIGatewayProxyHandler, APIGatewayProxyResult, APIGatewayProxyEvent } from 'aws-lambda';
-import { DDB, MainTable } from '@src/utils/dynamodb';
-import { Key } from 'aws-sdk/clients/dynamodb';
-import { DynamoDBError } from '@src/utils/errors';
+import DDBConfig from '@src/shared/infra/dynamodb/dynamodb';
+import { DynamoDBConnectionRepo } from '@src/modules/connection/repos/implementations/dynamoDBConnectionRepo';
+import { DeleteConnectionUseCase } from '@src/modules/connection/usecase/deleteConnection/deleteConnectionUseCase';
+import { DeleteConnectionDTO } from '@src/modules/connection/usecase/deleteConnection/deleteConnectionDTO';
+
+const connectionRepo = new DynamoDBConnectionRepo(DDBConfig);
+const connectionUseCase = new DeleteConnectionUseCase(connectionRepo);
 
 export const handle: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  try {
-    const connectionAttrValue = `Connection#${event.requestContext.connectionId}`;
-    const connectionKey: Key = {
-      PK: {
-        S: connectionAttrValue,
-      },
-      SK: {
-        S: 'Connection',
-      },
-    };
+  const connectionDTO: DeleteConnectionDTO = { id: event.requestContext.connectionId };
 
-    await DDB.deleteItem({
-      TableName: MainTable,
-      Key: connectionKey,
-    }).promise()
-      .catch((error) => {
-        throw new DynamoDBError(error, 'failed to delete the connection item');
-      });
-
+  const result = await connectionUseCase.execute(connectionDTO);
+  if (result.isOk) {
     return {
       statusCode: 200,
       body: '',
     };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.log(error);
-
-    return {
-      statusCode: 500,
-      body: 'server error',
-    };
   }
+
+  const error = result.unwrapErr();
+  // eslint-disable-next-line no-console
+  console.error(error);
+
+  return {
+    statusCode: 500,
+    body: 'server error',
+  };
 };

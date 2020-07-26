@@ -10,6 +10,7 @@
     "remove": "serverless remove"
   },
   "dependencies": {
+    "@hqoss/monads": "^0.3.4",
     "@types/verror": "^1.10.4",
     "aws-lambda": "^1.0.6",
     "aws-sdk": "^2.709.0",
