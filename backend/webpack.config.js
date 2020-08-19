@@ -16,6 +16,7 @@ module.exports = {
     alias: {
       '@src': path.resolve(__dirname, './src'),
       '@connection': path.resolve(__dirname, './src/modules/connection'),
+      '@support': path.resolve(__dirname, './src/modules/support'),
       '@tests': path.resolve(__dirname, './tests'),
     },
   },

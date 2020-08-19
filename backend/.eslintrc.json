@@ -35,6 +35,7 @@
         "map": [
           ["@src", "./src"],
           ["@connection", "./src/modules/connection"],
+          ["@support", "./src/modules/support"],
           ["@tests", "./tests"]
         ],
         "extensions": [
