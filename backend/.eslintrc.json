@@ -5,15 +5,20 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    // Prettier rules should always be the last item to override conflicting rules
+    "prettier",
+    "prettier/@typescript-eslint"
   ],
   "plugins": [
     "jest",
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "prettier"
   ],
   "root": true,
   "globals": {},
   "rules": {
+    "prettier/prettier": 2, // 2 == error
     "import/no-unresolved": [2, {"commonjs": true, "amd": true}],
     "import/prefer-default-export": "off",
     "import/extensions": "off",
