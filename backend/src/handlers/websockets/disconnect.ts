@@ -8,8 +8,12 @@ import { DeleteConnectionDTO } from '@connection/usecase/deleteConnection/delete
 const connectionRepo = new DynamoDBConnectionRepo(DDBConfig);
 const connectionUseCase = new DeleteConnectionUseCase(connectionRepo);
 
-export const handle: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const connectionDTO: DeleteConnectionDTO = { id: event.requestContext.connectionId };
+export const handle: APIGatewayProxyHandler = async (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
+  const connectionDTO: DeleteConnectionDTO = {
+    id: event.requestContext.connectionId,
+  };
 
   const result = await connectionUseCase.execute(connectionDTO);
   if (result.isOk) {

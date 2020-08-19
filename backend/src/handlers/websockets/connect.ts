@@ -8,7 +8,9 @@ import { CreateConnectionDTO } from '@connection/usecase/createConnection/create
 const connectionRepo = new DynamoDBConnectionRepo(DDBConfig);
 const connectionUseCase = new CreateConnectionUseCase(connectionRepo);
 
-export const handle: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const handle: APIGatewayProxyHandler = async (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
   const connectionDTO: CreateConnectionDTO = {
     id: event.requestContext.connectionId,
     userId: event.requestContext.authorizer.principalId,

@@ -5,7 +5,7 @@ import { ValidationError, AxiosError } from '@src/utils/errors';
 
 const iss = process.env.ISS;
 
-type JWKPems = { [key: string]: string }
+type JWKPems = { [key: string]: string };
 export const cognitoPublicKeys: JWKPems = {};
 
 type JWK = {
@@ -24,15 +24,14 @@ type JWTPayload = {
   username: string;
   iat: number;
   exp: number;
-}
+};
 
 // Fetches JsonWebKeys of the `iss`
 export async function fetchJWKs(): Promise<void> {
   const jwksUrl = `${iss}/.well-known/jwks.json`;
-  const jwks = await axios.get(jwksUrl)
-    .catch((err) => {
-      throw new AxiosError(err, 'cannot access JWKs at "%s"', jwksUrl);
-    });
+  const jwks = await axios.get(jwksUrl).catch((err) => {
+    throw new AxiosError(err, 'cannot access JWKs at "%s"', jwksUrl);
+  });
 
   jwks.data.keys.forEach((k: JWK) => {
     const jwkArray: jwkToPem.JWK = {
@@ -48,9 +47,9 @@ export async function fetchJWKs(): Promise<void> {
 export function validateToken(token: string, pems: JWKPems): JWTPayload {
   // Fail if the token is not jwt
   const decodedJwt = decode(token, { complete: true }) as {
-    header: { kid: string },
+    header: { kid: string };
     // eslint-disable-next-line camelcase
-    payload: { iss: string, token_use: string }
+    payload: { iss: string; token_use: string };
   };
 
   if (!decodedJwt) {

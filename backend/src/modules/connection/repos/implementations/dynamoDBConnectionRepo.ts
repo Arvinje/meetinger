@@ -24,10 +24,12 @@ export class DynamoDBConnectionRepo implements ConnectionRepo {
     };
 
     try {
-      await this.client.putItem({
-        TableName: this.tables.MainTable,
-        Item: newConnectionItem,
-      }).promise();
+      await this.client
+        .putItem({
+          TableName: this.tables.MainTable,
+          Item: newConnectionItem,
+        })
+        .promise();
     } catch (error) {
       throw new DynamoDBError(error, 'failed to create new connection item');
     }
@@ -35,13 +37,15 @@ export class DynamoDBConnectionRepo implements ConnectionRepo {
 
   async delete(id: string): Promise<void> {
     try {
-      await this.client.deleteItem({
-        TableName: this.tables.MainTable,
-        Key: {
-          PK: { S: id },
-          SK: { S: 'Connection' },
-        },
-      }).promise();
+      await this.client
+        .deleteItem({
+          TableName: this.tables.MainTable,
+          Key: {
+            PK: { S: id },
+            SK: { S: 'Connection' },
+          },
+        })
+        .promise();
     } catch (error) {
       throw new DynamoDBError(error, 'failed to delete the connection item');
     }
