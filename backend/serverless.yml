@@ -72,6 +72,16 @@ functions:
     environment:
       ISS: ${ssm:/cognito-user-pool/minutes/iss~true}
 
+  UserRegister:
+    handler: src/handlers/cognito/postConfirmation.handle
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}
+    events:
+      - cognitoUserPool:
+          pool: minutes_user_pool
+          trigger: PostConfirmation
+          existing: true
+
   WebsocketAuth:
     handler: src/handlers/authorizer/wsHandler.handle
     environment:
