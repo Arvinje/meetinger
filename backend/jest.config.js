@@ -10,7 +10,7 @@ module.exports = {
     '^@transformers/(.*)$': '<rootDir>/src/transformers/$1',
     '^@src/(.*)$': '<rootDir>/src/$1',
     '^@connection/(.*)$': '<rootDir>/src/modules/connection/$1',
-    '^@support/(.*)$': '<rootDir>/src/modules/support/$1',
+    '^@users/(.*)$': '<rootDir>/src/modules/users/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
 };
