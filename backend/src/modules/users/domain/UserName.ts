@@ -21,10 +21,10 @@ export class UserName extends ValueObject<UserNameProps> {
     super(props);
   }
 
-  public static async create(props: UserNameProps): Promise<Response> {
+  public static async create(username: string): Promise<Response> {
     try {
-      const username = await schema.validateAsync(props.username, { convert: true });
-      return Ok(new UserName({ username }));
+      const validUsername = await schema.validateAsync(username, { convert: true });
+      return Ok(new UserName({ username: validUsername }));
     } catch (error) {
       if (error instanceof Joi.ValidationError) return Err(new ValidationError(error.message));
       return Err(new InternalError('unknown error detected', error));
