@@ -1,5 +1,4 @@
 provider "aws" {
-  alias   = "eu-central-1"
   region  = "eu-central-1"
 }
 
@@ -58,6 +57,26 @@ resource "aws_cognito_user_pool" "cognito_pool" {
   auto_verified_attributes = [
     "email"
   ]
+  
+  alias_attributes = [
+    "email"
+  ]
+
+  username_configuration {
+    case_sensitive = false
+  }
+
+  schema {
+    name                      = "email"
+    attribute_data_type       = "String"
+    developer_only_attribute  = false
+    mutable                   = true
+    required                  = true
+    string_attribute_constraints {
+      min_length = 6
+      max_length = 100
+    }
+  }
 
   password_policy {
     minimum_length    = 10

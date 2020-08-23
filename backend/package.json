@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hqoss/monads": "^0.3.4",
+    "api-gateway-auth-policy": "^1.0.1",
     "aws-lambda": "^1.0.6",
     "aws-sdk": "^2.709.0",
     "axios": "^0.19.2",

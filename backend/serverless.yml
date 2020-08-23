@@ -67,6 +67,11 @@ provider:
 
 
 functions:
+  RestAuth:
+    handler: src/handlers/authorizer/restHandler.handle
+    environment:
+      ISS: ${ssm:/cognito-user-pool/minutes/iss~true}
+
   WebsocketAuth:
     handler: src/handlers/authorizer/wsHandler.handle
     environment:
