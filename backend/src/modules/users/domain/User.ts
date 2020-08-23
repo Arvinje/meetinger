@@ -32,4 +32,14 @@ export class User extends Entity<UserProps> {
   get introduction(): UserIntroduction {
     return this.props.introduction;
   }
+
+  // eslint-disable-next-line no-useless-constructor
+  private constructor(props: UserProps) {
+    super(props);
+  }
+
+  public static create(props: UserProps): User {
+    const user = new User(props);
+    return user;
+  }
 }

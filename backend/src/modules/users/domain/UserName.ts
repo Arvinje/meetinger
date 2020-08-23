@@ -7,7 +7,7 @@ interface UserNameProps {
   username: string;
 }
 
-type Response = Result<UserName, ValidationError>;
+type Response = Result<UserName, ValidationError | InternalError>;
 
 const schema = Joi.string().required().token().max(40).lowercase();
 
