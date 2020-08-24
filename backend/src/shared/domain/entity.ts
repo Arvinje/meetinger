@@ -11,10 +11,6 @@ export abstract class Entity<T> {
     this.props = props;
   }
 
-  get id(): UniqueID {
-    return this._id;
-  }
-
   equals(eo: Entity<T>): boolean {
     if (eo === null || eo === undefined) {
       return false;

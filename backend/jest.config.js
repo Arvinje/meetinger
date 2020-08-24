@@ -11,6 +11,7 @@ module.exports = {
     '^@src/(.*)$': '<rootDir>/src/$1',
     '^@connection/(.*)$': '<rootDir>/src/modules/connection/$1',
     '^@users/(.*)$': '<rootDir>/src/modules/users/$1',
+    '^@meetings/(.*)$': '<rootDir>/src/modules/meetings/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
 };

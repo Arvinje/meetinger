@@ -41,6 +41,7 @@
           ["@src", "./src"],
           ["@connection", "./src/modules/connection"],
           ["@users", "./src/modules/users"],
+          ["@meetings", "./src/modules/meetings"],
           ["@tests", "./tests"]
         ],
         "extensions": [

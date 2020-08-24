@@ -17,6 +17,7 @@ module.exports = {
       '@src': path.resolve(__dirname, './src'),
       '@connection': path.resolve(__dirname, './src/modules/connection'),
       '@users': path.resolve(__dirname, './src/modules/users'),
+      '@meetings': path.resolve(__dirname, './src/modules/meetings'),
       '@tests': path.resolve(__dirname, './tests'),
     },
   },
