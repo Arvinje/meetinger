@@ -41,6 +41,10 @@ export class Meeting extends Entity<MeetingProps> {
     return this.props.attendees;
   }
 
+  addAttendee(...attendees: Attendee[]): void {
+    this.props.attendees.push(...attendees);
+  }
+
   // eslint-disable-next-line no-useless-constructor
   private constructor(props: MeetingProps, id?: UniqueID) {
     super(props, id);
