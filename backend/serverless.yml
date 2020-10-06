@@ -21,6 +21,13 @@ custom:
   prune:
     automatic: true
     number: 3
+  <<: &authorizer
+    name: RestAuth
+    managedExternally: false
+    resultTtlInSeconds: 300
+    identitySource: method.request.header.Authorization
+    identityValidationExpression: ^Bearer [-0-9a-zA-Z\._]*$
+    type: token
 
 plugins:
   - serverless-webpack
@@ -106,3 +113,13 @@ functions:
           route: $disconnect
     environment:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
+
+  CreateMeeting:
+    handler: src/modules/meetings/usecase/createMeeting/index.handler
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}
+    events:
+      - http:
+          path: meetings
+          method: post
+          authorizer: *authorizer

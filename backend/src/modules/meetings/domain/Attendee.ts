@@ -10,6 +10,7 @@ export interface AttendeeProps {
   fullName: UserFullName;
   meetingID: MeetingID;
   joinedMeetingOn?: Date;
+  isOrganizer?: boolean;
 }
 
 export class Attendee extends Entity<AttendeeProps> {
@@ -29,13 +30,21 @@ export class Attendee extends Entity<AttendeeProps> {
     return this.props.joinedMeetingOn;
   }
 
+  get isOrganizer(): boolean {
+    return this.props.isOrganizer;
+  }
+
   // eslint-disable-next-line no-useless-constructor
   private constructor(props: AttendeeProps, id?: UniqueID) {
     super(props, id);
   }
 
   public static create(props: AttendeeProps, id?: UniqueID): Result<Attendee, void> {
-    const attendee = new Attendee(props, id);
+    const defaultProps: AttendeeProps = {
+      ...props,
+      isOrganizer: props.isOrganizer || false,
+    };
+    const attendee = new Attendee(defaultProps, id);
     return Ok(attendee);
   }
 }

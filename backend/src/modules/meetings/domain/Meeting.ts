@@ -1,7 +1,7 @@
 import { Entity } from '@src/shared/domain/entity';
-import { UserName } from '@src/modules/users/domain/UserName';
 import { UniqueID } from '@src/shared/domain/uniqueId';
 import { Result, Ok } from '@hqoss/monads';
+import { UserName } from '@src/modules/users/domain/UserName';
 import { MeetingID } from './MeetingID';
 import { MeetingTitle } from './MeetingTitle';
 import { MeetingDescription } from './MeetingDescription';
@@ -9,10 +9,11 @@ import { Attendee } from './Attendee';
 
 export interface MeetingProps {
   title: MeetingTitle;
-  organizer: UserName;
   description: MeetingDescription;
   startsAt: Date;
   attendees?: Attendee[];
+  createdBy: UserName;
+  createdAt?: Date;
 }
 
 export class Meeting extends Entity<MeetingProps> {
@@ -23,10 +24,6 @@ export class Meeting extends Entity<MeetingProps> {
 
   get title(): MeetingTitle {
     return this.props.title;
-  }
-
-  get organizer(): UserName {
-    return this.props.organizer;
   }
 
   get description(): MeetingDescription {
@@ -41,6 +38,14 @@ export class Meeting extends Entity<MeetingProps> {
     return this.props.attendees;
   }
 
+  get createdBy(): UserName {
+    return this.props.createdBy;
+  }
+
+  get createdAt(): UserName {
+    return this.props.createdBy;
+  }
+
   addAttendee(...attendees: Attendee[]): void {
     this.props.attendees.push(...attendees);
   }
@@ -51,7 +56,12 @@ export class Meeting extends Entity<MeetingProps> {
   }
 
   public static create(props: MeetingProps, id?: UniqueID): Result<Meeting, void> {
-    const meeting = new Meeting(props, id);
+    const defaultProps: MeetingProps = {
+      ...props,
+      attendees: props.attendees || [],
+      createdAt: props.createdAt || new Date(),
+    };
+    const meeting = new Meeting(defaultProps, id);
     return Ok(meeting);
   }
 }

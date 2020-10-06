@@ -27,9 +27,12 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
     const meetingItem: PutItemInputAttributeMap = {
       PK: { S: meeting.id.id.toString() },
       SK: { S: 'META' },
-      GSI1PK: { S: `${startsAt.year}-${startsAt.month}#MEETINGS` },
+      GSI1PK: { S: `${startsAt.year()}-${startsAt.month()}#MEETINGS` },
       GSI1SK: { S: meeting.startsAt.toISOString() },
+      GSI2PK: { S: `${meeting.createdBy.value}#MEETINGS` },
+      GSI2SK: { S: meeting.startsAt.toISOString() },
       Title: { S: meeting.title.value },
+      Description: { S: meeting.description.value },
     };
     items.push({
       Put: {
@@ -50,6 +53,8 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
         GSI1PK: { S: `USER#${attendee.username.value}#MEETINGS` },
         GSI1SK: { S: meeting.startsAt.toISOString() },
         Title: { S: meeting.title.value },
+        FullName: { S: attendee.fullName.value },
+        IsOrganizer: { BOOL: attendee.isOrganizer },
       };
       items.push({
         Put: {

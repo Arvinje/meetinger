@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Err, Ok } from '@hqoss/monads';
+import { Err, Ok, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
 import { ValidationError, DynamoDBError, InternalError } from '@src/utils/errors';
 import { UserRepo } from '@src/modules/users/repos/UserRepo';
@@ -9,8 +9,10 @@ import { MeetingTitle } from '@meetings/domain/MeetingTitle';
 import { MeetingDescription } from '@meetings/domain/MeetingDescription';
 import { Meeting } from '@meetings/domain/Meeting';
 import { Attendee } from '@meetings/domain/Attendee';
-import { Response } from './CreateMeetingResponse';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
+import { CreateMeetingResponse } from './CreateMeetingResponse';
+
+type Response = Result<CreateMeetingResponse, DynamoDBError | ValidationError | InternalError>;
 
 export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promise<Response>> {
   private meetingRepo: MeetingRepo;
@@ -37,18 +39,19 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
 
     const meeting = Meeting.create({
       title: titleOrError.unwrap(),
-      organizer: organizerOrError.unwrap(),
       description: descOrError.unwrap(),
       startsAt: startsAtOrError.toDate(),
+      createdBy: organizerOrError.unwrap(),
     }).unwrap();
 
     try {
-      const organizer = await this.userRepo.find(organizerOrError.unwrap());
+      const organizer = await this.userRepo.findByUserName(organizerOrError.unwrap());
       const organizerAsAttendee = Attendee.create({
         username: organizer.username,
         fullName: organizer.fullName,
         meetingID: meeting.id,
         joinedMeetingOn: new Date(),
+        isOrganizer: true,
       }).unwrap();
 
       meeting.addAttendee(organizerAsAttendee);
