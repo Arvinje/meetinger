@@ -5,6 +5,8 @@ import { UserRepo } from '@users/repos/UserRepo';
 import { UserName } from '@users/domain/UserName';
 import { UserEmail } from '@users/domain/UserEmail';
 import { User } from '@users/domain/User';
+import { UserFullName } from '@users/domain/UserFullName';
+import { UserIntroduction } from '@users/domain/UserIntroduction';
 import { CreateUserRequest } from './CreateUserRequest';
 import { Response } from './CreateUserResponse';
 
@@ -19,17 +21,25 @@ export class CreateUserUseCase implements UseCase<CreateUserRequest, Promise<Res
     const usernameOrError = await UserName.create(request.username);
     if (usernameOrError.isErr()) return Err(usernameOrError.unwrapErr());
 
+    const fullNameOrError = await UserFullName.create(request.username);
+    if (fullNameOrError.isErr()) return Err(fullNameOrError.unwrapErr());
+
     const emailOrError = await UserEmail.create(request.email);
     if (emailOrError.isErr()) return Err(emailOrError.unwrapErr());
 
-    const user = User.create({
+    const introOrError = await UserIntroduction.create('');
+    if (introOrError.isErr()) return Err(introOrError.unwrapErr());
+
+    const userOrError = User.create({
       username: usernameOrError.unwrap(),
+      fullName: fullNameOrError.unwrap(),
       email: emailOrError.unwrap(),
       joinedOn: new Date(),
+      introduction: introOrError.unwrap(),
     });
 
     try {
-      await this.userRepo.create(user);
+      await this.userRepo.create(userOrError.unwrap());
       return Ok(undefined);
     } catch (error) {
       return Err(error as DynamoDBError);

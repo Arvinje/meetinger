@@ -9,7 +9,7 @@ interface UserIntroductionProps {
 
 type Response = Result<UserIntroduction, ValidationError>;
 
-const schema = Joi.string().required().min(0).max(300);
+const schema = Joi.string().allow('').min(0).max(300);
 
 export class UserIntroduction extends ValueObject<UserIntroductionProps> {
   get value(): string {

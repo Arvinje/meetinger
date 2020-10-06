@@ -3,5 +3,5 @@ import { UserName } from '@users/domain/UserName';
 
 export interface UserRepo {
   create(user: User): Promise<void>;
-  find(username: UserName): Promise<User>;
+  findByUserName(username: UserName): Promise<User>;
 }

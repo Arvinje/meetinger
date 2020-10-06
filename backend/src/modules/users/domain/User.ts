@@ -1,4 +1,5 @@
 import { Entity } from '@src/shared/domain/entity';
+import { Ok, Result } from '@hqoss/monads';
 import { UserIntroduction } from './UserIntroduction';
 import { UserName } from './UserName';
 import { UserFullName } from './UserFullName';
@@ -6,11 +7,13 @@ import { UserEmail } from './UserEmail';
 
 export interface UserProps {
   username: UserName;
-  email?: UserEmail;
-  fullName?: UserFullName;
+  email: UserEmail;
+  fullName: UserFullName;
   joinedOn?: Date;
-  introduction?: UserIntroduction;
+  introduction: UserIntroduction;
 }
+
+type Response = Result<User, void>;
 
 export class User extends Entity<UserProps> {
   get username(): UserName {
@@ -38,8 +41,11 @@ export class User extends Entity<UserProps> {
     super(props);
   }
 
-  public static create(props: UserProps): User {
-    const user = new User(props);
-    return user;
+  public static create(props: UserProps): Response {
+    const defaultProps: UserProps = {
+      ...props,
+      joinedOn: props.joinedOn || new Date(),
+    };
+    return Ok(new User(defaultProps));
   }
 }
