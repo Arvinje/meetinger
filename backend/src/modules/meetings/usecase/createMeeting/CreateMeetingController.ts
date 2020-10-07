@@ -3,6 +3,8 @@ import { CreateMeetingRequest } from '@meetings/usecase/createMeeting/CreateMeet
 import { CreateMeetingUseCase } from '@src/modules/meetings/usecase/createMeeting/CreateMeetingUseCase';
 import { BaseController } from '@src/shared/infra/http/BaseController';
 import { APIGatewayWithAuthorizerEvent } from '@src/shared/infra/http/types';
+import { ValidationError } from '@src/shared/core/AppError';
+import { BaseErrorResponse } from '@src/shared/core/BaseError';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
 
 export class CreateMeetingController extends BaseController {
@@ -20,16 +22,12 @@ export class CreateMeetingController extends BaseController {
     const result = await this.useCase.execute(request);
     if (result.isErr()) {
       const error = result.unwrapErr();
-
-      // eslint-disable-next-line no-console
-      console.error(error);
-
-      switch (error.name) {
-        case 'ValidationError':
-          return this.unprocessableEntity();
+      switch (error.type) {
+        case ValidationError.type:
+          return this.unprocessableEntity<BaseErrorResponse>(error.toResponse as ValidationError);
 
         default:
-          return this.internalError();
+          return this.internalError<BaseErrorResponse>(error.toResponse);
       }
     }
 

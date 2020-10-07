@@ -1,13 +1,13 @@
 import Joi from 'joi';
 import { Result, Ok, Err } from '@hqoss/monads';
-import { ValidationError, InternalError } from '@src/utils/errors';
 import { ValueObject } from '@src/shared/domain/valueObject';
+import { ValidationError, UnexpectedError } from '@src/shared/core/AppError';
 
 interface UserNameProps {
   username: string;
 }
 
-type Response = Result<UserName, ValidationError | InternalError>;
+type Response = Result<UserName, ValidationError | UnexpectedError>;
 
 const schema = Joi.string().required().token().max(40).lowercase();
 
@@ -26,8 +26,11 @@ export class UserName extends ValueObject<UserNameProps> {
       const validUsername = await schema.validateAsync(username, { convert: true });
       return Ok(new UserName({ username: validUsername }));
     } catch (error) {
-      if (error instanceof Joi.ValidationError) return Err(new ValidationError(error.message));
-      return Err(new InternalError('unknown error detected', error));
+      if (error instanceof Joi.ValidationError)
+        return Err(ValidationError.wrap(error, error.message));
+      return Err(
+        UnexpectedError.wrap(error, 'Unexpected error when creating an instance of UserName')
+      );
     }
   }
 }

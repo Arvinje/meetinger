@@ -1,7 +1,7 @@
+import { UnAuthorizedError, ValidationError } from '@src/shared/core/AppError';
 import axios from 'axios';
 import { decode, verify } from 'jsonwebtoken';
 import jwkToPem from 'jwk-to-pem';
-import { ValidationError, AxiosError } from '@src/utils/errors';
 
 const iss = process.env.ISS;
 
@@ -30,7 +30,7 @@ type JWTPayload = {
 export async function fetchJWKs(): Promise<void> {
   const jwksUrl = `${iss}/.well-known/jwks.json`;
   const jwks = await axios.get(jwksUrl).catch((err) => {
-    throw new AxiosError(err, 'cannot access JWKs at "%s"', jwksUrl);
+    throw UnAuthorizedError.wrap(err, `cannot access JWKs at "${jwksUrl}"`);
   });
 
   jwks.data.keys.forEach((k: JWK) => {
@@ -53,17 +53,17 @@ export function validateToken(token: string, pems: JWKPems): JWTPayload {
   };
 
   if (!decodedJwt) {
-    throw new ValidationError('invalid JWT token');
+    throw ValidationError.create('invalid JWT token');
   }
 
   // Fail if token is not from your UserPool
   if (decodedJwt.payload.iss !== iss) {
-    throw new ValidationError('invalid issuer');
+    throw ValidationError.create('invalid issuer');
   }
 
   // Reject the jwt if it's not an 'Access Token'
   if (decodedJwt.payload.token_use !== 'access') {
-    throw new ValidationError('not an access token');
+    throw ValidationError.create('not an access token');
   }
 
   // Get the kid from the token and retrieve corresponding PEM
@@ -71,13 +71,13 @@ export function validateToken(token: string, pems: JWKPems): JWTPayload {
 
   const pem = pems[kid];
   if (!pem) {
-    throw new ValidationError('invalid access token');
+    throw ValidationError.create('invalid access token');
   }
 
   try {
     // Verify the signature of the JWT token to ensure it's really coming from your User Pool
     return verify(token, pem, { issuer: iss }) as JWTPayload;
   } catch (error) {
-    throw new ValidationError(error, 'invalid signature');
+    throw ValidationError.wrap(error, 'invalid signature');
   }
 }

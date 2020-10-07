@@ -18,16 +18,12 @@ export const handle: APIGatewayProxyHandler = async (
   };
 
   const result = await connectionUseCase.execute(connectionDTO);
-  if (result.isOk) {
+  if (result.isOk()) {
     return {
       statusCode: 200,
       body: '',
     };
   }
-
-  const error = result.unwrapErr();
-  // eslint-disable-next-line no-console
-  console.error(error);
 
   return {
     statusCode: 500,

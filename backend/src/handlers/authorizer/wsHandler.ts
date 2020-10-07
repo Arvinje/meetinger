@@ -1,13 +1,13 @@
 import 'source-map-support/register';
 import { AuthResponse, CustomAuthorizerEvent } from 'aws-lambda';
-import { UnAuthorizedError, ValidationError } from '@src/utils/errors';
 import { fetchJWKs, cognitoPublicKeys, validateToken } from '@src/utils/authorization';
+import { ValidationError } from '@src/shared/core/AppError';
 
 // Authorizer function for Websocket connections
 export async function handle(event: CustomAuthorizerEvent): Promise<AuthResponse> {
   try {
     if (!event.queryStringParameters.Auth) {
-      throw new ValidationError('authorization token not found');
+      throw ValidationError.create('authorization token not found');
     }
 
     // Fetches JWKs if they're not available
@@ -33,6 +33,6 @@ export async function handle(event: CustomAuthorizerEvent): Promise<AuthResponse
       },
     };
   } catch (error) {
-    throw new UnAuthorizedError('Unauthorized');
+    throw new Error('Unauthorized');
   }
 }

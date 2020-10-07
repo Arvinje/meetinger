@@ -1,10 +1,10 @@
 import DynamoDB, { PutItemInputAttributeMap, Key } from 'aws-sdk/clients/dynamodb';
 import { DDBConfigProps, DDBTables } from '@src/shared/infra/dynamodb/dynamodb';
-import { DynamoDBError } from '@src/utils/errors';
 import { UserRepo } from '@users/repos/UserRepo';
 import { User, UserProps } from '@users/domain/User';
 import { UserName } from '@users/domain/UserName';
 import { UserEmail } from '@users/domain/UserEmail';
+import { UnexpectedError } from '@src/shared/core/AppError';
 import { UserFullName } from '../../domain/UserFullName';
 import { UserIntroduction } from '../../domain/UserIntroduction';
 
@@ -40,7 +40,7 @@ export class DynamoDBUserRepo implements UserRepo {
         })
         .promise();
     } catch (error) {
-      throw new DynamoDBError(error, 'failed to create new user item');
+      throw UnexpectedError.wrap(error, 'failed to create new user item');
     }
   }
 
@@ -74,7 +74,7 @@ export class DynamoDBUserRepo implements UserRepo {
 
       return userOrError.unwrap();
     } catch (error) {
-      throw new DynamoDBError(error, `failed to fetch user(${username.value})`);
+      throw UnexpectedError.wrap(error, `failed to fetch user(${username.value})`);
     }
   }
 }

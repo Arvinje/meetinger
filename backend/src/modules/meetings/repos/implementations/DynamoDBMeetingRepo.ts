@@ -4,9 +4,9 @@ import DynamoDB, {
   TransactWriteItemList,
 } from 'aws-sdk/clients/dynamodb';
 import { DDBConfigProps, DDBTables } from '@src/shared/infra/dynamodb/dynamodb';
-import { DynamoDBError } from '@src/utils/errors';
 import { Meeting } from '@meetings/domain/Meeting';
 import { Attendee } from '@meetings/domain/Attendee';
+import { UnexpectedError } from '@src/shared/core/AppError';
 import { MeetingRepo } from '../MeetingRepo';
 
 export class DynamoDBMeetingRepo implements MeetingRepo {
@@ -75,7 +75,7 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
         })
         .promise();
     } catch (error) {
-      throw new DynamoDBError(error, 'failed to create new meeting item(s)');
+      throw UnexpectedError.wrap(error, 'Failed to create new meeting item(s)');
     }
   }
 }

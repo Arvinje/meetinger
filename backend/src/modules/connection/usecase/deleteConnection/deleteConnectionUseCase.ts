@@ -1,9 +1,10 @@
 import { UseCase } from '@src/shared/core/useCase';
-import { Ok, Err } from '@hqoss/monads';
-import { DynamoDBError } from '@src/utils/errors';
+import { Ok, Err, Result } from '@hqoss/monads';
 import { ConnectionRepo } from '@connection/repos/connectionRepo';
-import { Response } from './deleteConnectionResponse';
+import { UnexpectedError } from '@src/shared/core/AppError';
 import { DeleteConnectionDTO } from './deleteConnectionDTO';
+
+type Response = Result<void, UnexpectedError>;
 
 export class DeleteConnectionUseCase implements UseCase<DeleteConnectionDTO, Promise<Response>> {
   private connectionRepo: ConnectionRepo;
@@ -17,7 +18,12 @@ export class DeleteConnectionUseCase implements UseCase<DeleteConnectionDTO, Pro
       await this.connectionRepo.delete(request.id);
       return Ok(undefined);
     } catch (error) {
-      return Err(error as DynamoDBError);
+      return Err(
+        UnexpectedError.wrap(
+          error,
+          'An unexpected error occured when executing DeleteConnectionUseCase'
+        )
+      );
     }
   }
 }

@@ -1,5 +1,5 @@
-import { Ok, Err } from '@hqoss/monads';
-import { DynamoDBError } from '@src/utils/errors';
+import { Ok, Err, Result } from '@hqoss/monads';
+import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { UseCase } from '@src/shared/core/useCase';
 import { UserRepo } from '@users/repos/UserRepo';
 import { UserName } from '@users/domain/UserName';
@@ -8,7 +8,8 @@ import { User } from '@users/domain/User';
 import { UserFullName } from '@users/domain/UserFullName';
 import { UserIntroduction } from '@users/domain/UserIntroduction';
 import { CreateUserRequest } from './CreateUserRequest';
-import { Response } from './CreateUserResponse';
+
+type Response = Result<void, ValidationError | UnexpectedError>;
 
 export class CreateUserUseCase implements UseCase<CreateUserRequest, Promise<Response>> {
   private userRepo: UserRepo;
@@ -42,7 +43,7 @@ export class CreateUserUseCase implements UseCase<CreateUserRequest, Promise<Res
       await this.userRepo.create(userOrError.unwrap());
       return Ok(undefined);
     } catch (error) {
-      return Err(error as DynamoDBError);
+      return Err(error);
     }
   }
 }

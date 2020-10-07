@@ -1,7 +1,6 @@
 import moment from 'moment';
 import { Err, Ok, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
-import { ValidationError, DynamoDBError, InternalError } from '@src/utils/errors';
 import { UserRepo } from '@src/modules/users/repos/UserRepo';
 import { UserName } from '@src/modules/users/domain/UserName';
 import { MeetingRepo } from '@meetings/repos/MeetingRepo';
@@ -9,10 +8,11 @@ import { MeetingTitle } from '@meetings/domain/MeetingTitle';
 import { MeetingDescription } from '@meetings/domain/MeetingDescription';
 import { Meeting } from '@meetings/domain/Meeting';
 import { Attendee } from '@meetings/domain/Attendee';
+import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
 
-type Response = Result<CreateMeetingResponse, DynamoDBError | ValidationError | InternalError>;
+type Response = Result<CreateMeetingResponse, ValidationError | UnexpectedError>;
 
 export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promise<Response>> {
   private meetingRepo: MeetingRepo;
@@ -35,7 +35,8 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
     if (descOrError.isErr()) return Err(descOrError.unwrapErr());
 
     const startsAtOrError = moment(request.startsAt);
-    if (!startsAtOrError.isValid()) return Err(new ValidationError('startsAt is not valid'));
+    if (!startsAtOrError.isValid())
+      return Err(ValidationError.create('Meeting start time is not valid'));
 
     const meeting = Meeting.create({
       title: titleOrError.unwrap(),
@@ -61,8 +62,12 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
         id: meeting.id.id.toString(),
       });
     } catch (error) {
-      if (error instanceof DynamoDBError) return Err(error);
-      return Err(new InternalError(error, 'unknown error detected'));
+      return Err(
+        UnexpectedError.wrap(
+          error,
+          'An unexpected error occured when executing CreateMeetingUseCase'
+        )
+      );
     }
   }
 }

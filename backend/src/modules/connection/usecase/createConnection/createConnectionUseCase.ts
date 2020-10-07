@@ -1,10 +1,11 @@
-import { Ok, Err } from '@hqoss/monads';
-import { DynamoDBError } from '@src/utils/errors';
+import { Ok, Err, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
 import { ConnectionRepo } from '@connection/repos/connectionRepo';
 import { Connection } from '@connection/domain/connection';
+import { UnexpectedError } from '@src/shared/core/AppError';
 import { CreateConnectionDTO } from './createConnectionDTO';
-import { Response } from './createConnectionResponse';
+
+type Response = Result<void, UnexpectedError>;
 
 export class CreateConnectionUseCase implements UseCase<CreateConnectionDTO, Promise<Response>> {
   private connectionRepo: ConnectionRepo;
@@ -24,7 +25,12 @@ export class CreateConnectionUseCase implements UseCase<CreateConnectionDTO, Pro
       await this.connectionRepo.create(connection);
       return Ok(undefined);
     } catch (error) {
-      return Err(error as DynamoDBError);
+      return Err(
+        UnexpectedError.wrap(
+          error,
+          'An unexpected error occured when executing CreateConnectionUseCase'
+        )
+      );
     }
   }
 }

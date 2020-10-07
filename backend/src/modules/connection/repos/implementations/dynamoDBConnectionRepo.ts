@@ -2,7 +2,7 @@ import DynamoDB, { PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb';
 import { ConnectionRepo } from '@connection/repos/connectionRepo';
 import { Connection } from '@connection/domain/connection';
 import { DDBConfigProps, DDBTables } from '@src/shared/infra/dynamodb/dynamodb';
-import { DynamoDBError } from '@src/utils/errors';
+import { UnexpectedError } from '@src/shared/core/AppError';
 
 export class DynamoDBConnectionRepo implements ConnectionRepo {
   private client: DynamoDB;
@@ -31,7 +31,7 @@ export class DynamoDBConnectionRepo implements ConnectionRepo {
         })
         .promise();
     } catch (error) {
-      throw new DynamoDBError(error, 'failed to create new connection item');
+      throw UnexpectedError.wrap(error, 'Failed to create new connection item');
     }
   }
 
@@ -47,7 +47,7 @@ export class DynamoDBConnectionRepo implements ConnectionRepo {
         })
         .promise();
     } catch (error) {
-      throw new DynamoDBError(error, 'failed to delete the connection item');
+      throw UnexpectedError.wrap(error, 'Failed to delete the connection item');
     }
   }
 }
