@@ -1,3 +1,5 @@
+import moment from 'moment';
+import { AttributeMap, PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb';
 import { Meeting } from '@meetings/domain/Meeting';
 import { UserName } from '@src/modules/users/domain/UserName';
 import { UniqueID } from '@src/shared/domain/uniqueId';
@@ -5,28 +7,20 @@ import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
 import { MeetingDescription } from '@meetings/domain/MeetingDescription';
 import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
 import { MeetingTitle } from '@meetings/domain/MeetingTitle';
-import { PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb';
-import moment from 'moment';
-
-export interface RawMeetingProps {
-  id: string;
-  title: string;
-  description: string;
-  startsAt: string;
-  createdBy: string;
-  remainingSeats: number;
-  availableSeats: number;
-}
 
 export class MeetingMap {
-  public static async toDomain(raw: RawMeetingProps): Promise<Meeting> {
-    const id = new UniqueID(raw.id);
-    const title = (await MeetingTitle.create(raw.title)).unwrap();
-    const description = (await MeetingDescription.create(raw.description)).unwrap();
-    const startsAt = new Date(raw.startsAt);
-    const createdBy = (await UserName.create(raw.createdBy)).unwrap();
-    const availableSeats = (await MeetingAvailableSeats.create(raw.availableSeats)).unwrap();
-    const remainingSeats = (await MeetingRemainingSeats.create(raw.remainingSeats)).unwrap();
+  public static async dynamoToDomain(raw: AttributeMap): Promise<Meeting> {
+    const id = new UniqueID(raw.PK.S);
+    const title = (await MeetingTitle.create(raw.Title.S)).unwrap();
+    const description = (await MeetingDescription.create(raw.Description.S)).unwrap();
+    const startsAt = new Date(raw.GSI1SK.S);
+    const createdBy = (await UserName.create(raw.GSI2PK.S.split('#')[0])).unwrap();
+    const availableSeats = (
+      await MeetingAvailableSeats.create(Number(raw.AvailableSeats.N))
+    ).unwrap();
+    const remainingSeats = (
+      await MeetingRemainingSeats.create(Number(raw.RemainingSeats.N))
+    ).unwrap();
 
     const meeting = await Meeting.create(
       {

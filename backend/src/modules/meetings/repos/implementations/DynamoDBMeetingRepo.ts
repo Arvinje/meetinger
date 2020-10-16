@@ -161,14 +161,6 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
       throw UnexpectedError.wrap(error, `Failed to fetch meeting(#${meetingID.id.toString()})`);
     }
 
-    return MeetingMap.toDomain({
-      id: meetingID.id.toString(),
-      title: queryResult.Item.Title.S,
-      description: queryResult.Item.Description.S,
-      startsAt: queryResult.Item.GSI1SK.S,
-      createdBy: queryResult.Item.GSI2PK.S.split('#')[0],
-      remainingSeats: Number(queryResult.Item.RemainingSeats.N),
-      availableSeats: Number(queryResult.Item.AvailableSeats.N),
-    });
+    return MeetingMap.dynamoToDomain(queryResult.Item);
   }
 }
