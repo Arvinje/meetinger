@@ -164,7 +164,7 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
     meeting.attendees.getRemovedItems().forEach((attendee: Attendee) => {
       const attendeeKey: Key = {
         PK: { S: meeting.id.id.toString() },
-        SK: { S: `USER#${attendee.joinedMeetingOn.toISOString()}` },
+        SK: { S: `ATTENDEE#${attendee.joinedMeetingOn.toISOString()}` },
       };
       items.push({
         Delete: {
