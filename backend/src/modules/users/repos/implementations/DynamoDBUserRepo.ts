@@ -5,8 +5,8 @@ import { User, UserProps } from '@users/domain/User';
 import { UserName } from '@users/domain/UserName';
 import { UserEmail } from '@users/domain/UserEmail';
 import { UnexpectedError } from '@src/shared/core/AppError';
-import { UserFullName } from '../../domain/UserFullName';
-import { UserIntroduction } from '../../domain/UserIntroduction';
+import { UserFullName } from '@users/domain/UserFullName';
+import { UserIntroduction } from '@users/domain/UserIntroduction';
 
 export class DynamoDBUserRepo implements UserRepo {
   private client: DynamoDB;

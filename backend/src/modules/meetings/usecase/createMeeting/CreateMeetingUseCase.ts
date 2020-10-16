@@ -9,9 +9,9 @@ import { MeetingDescription } from '@meetings/domain/MeetingDescription';
 import { Meeting } from '@meetings/domain/Meeting';
 import { Attendee } from '@meetings/domain/Attendee';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
+import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
-import { MeetingAvailableSeats } from '../../domain/MeetingAvailableSeats';
 
 type Response = Result<CreateMeetingResponse, ValidationError | UnexpectedError>;
 
