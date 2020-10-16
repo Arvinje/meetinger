@@ -80,4 +80,8 @@ export class Meeting extends Entity<MeetingProps> {
   public addAttendee(attendee: Attendee): void {
     this.props.attendees.add(attendee);
   }
+
+  public removeAttendee(attendee: Attendee): void {
+    this.props.attendees.remove(attendee);
+  }
 }

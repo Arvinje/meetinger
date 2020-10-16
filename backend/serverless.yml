@@ -130,6 +130,16 @@ functions:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
     events:
       - http:
-          path: meetings/{id}/join
+          path: meetings/{id}/attendance
           method: post
+          authorizer: *authorizer
+  
+  LeaveMeeting:
+    handler: src/modules/meetings/usecase/leaveMeeting/index.handler
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}
+    events:
+      - http:
+          path: meetings/{id}/attendance
+          method: delete
           authorizer: *authorizer
