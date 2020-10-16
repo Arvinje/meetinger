@@ -33,6 +33,8 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
       GSI2SK: { S: meeting.startsAt.toISOString() },
       Title: { S: meeting.title.value },
       Description: { S: meeting.description.value },
+      RemainingSeats: { N: meeting.remainingSeats.value.toString() },
+      AvailableSeats: { N: meeting.availableSeats.value.toString() },
     };
     items.push({
       Put: {
@@ -46,12 +48,14 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
     });
 
     // Attendees item(s)
-    meeting.attendees.forEach((attendee: Attendee) => {
+    meeting.attendees.getNewItems().forEach((attendee: Attendee) => {
       const attendeeItem: PutItemInputAttributeMap = {
         PK: { S: meeting.id.id.toString() },
-        SK: { S: `USER#${attendee.joinedMeetingOn.toISOString()}` },
-        GSI1PK: { S: `USER#${attendee.username.value}#MEETINGS` },
+        SK: { S: `ATTENDEE#${attendee.joinedMeetingOn.toISOString()}` },
+        GSI1PK: { S: `${attendee.username.value}#MEETINGS` },
         GSI1SK: { S: meeting.startsAt.toISOString() },
+        GSI2PK: { S: meeting.id.id.toString() },
+        GSI2SK: { S: `ATTENDEE#${attendee.username.value}` },
         Title: { S: meeting.title.value },
         FullName: { S: attendee.fullName.value },
         IsOrganizer: { BOOL: attendee.isOrganizer },

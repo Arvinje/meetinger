@@ -11,6 +11,7 @@ import { Attendee } from '@meetings/domain/Attendee';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
+import { MeetingAvailableSeats } from '../../domain/MeetingAvailableSeats';
 
 type Response = Result<CreateMeetingResponse, ValidationError | UnexpectedError>;
 
@@ -38,12 +39,20 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
     if (!startsAtOrError.isValid())
       return Err(ValidationError.create('Meeting start time is not valid'));
 
-    const meeting = Meeting.create({
-      title: titleOrError.unwrap(),
-      description: descOrError.unwrap(),
-      startsAt: startsAtOrError.toDate(),
-      createdBy: organizerOrError.unwrap(),
-    }).unwrap();
+    const availableSeatsOrError = await MeetingAvailableSeats.create(request.availableSeats);
+    if (availableSeatsOrError.isErr()) {
+      return Err(ValidationError.create('Count of available seats is not valid'));
+    }
+
+    const meeting = (
+      await Meeting.create({
+        title: titleOrError.unwrap(),
+        description: descOrError.unwrap(),
+        startsAt: startsAtOrError.toDate(),
+        createdBy: organizerOrError.unwrap(),
+        availableSeats: availableSeatsOrError.unwrap(),
+      })
+    ).unwrap();
 
     try {
       const organizer = await this.userRepo.findByUserName(organizerOrError.unwrap());

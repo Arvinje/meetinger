@@ -6,12 +6,17 @@ import { MeetingID } from './MeetingID';
 import { MeetingTitle } from './MeetingTitle';
 import { MeetingDescription } from './MeetingDescription';
 import { Attendee } from './Attendee';
+import { Attendees } from './Attendees';
+import { MeetingRemainingSeats } from './MeetingRemainingSeats';
+import { MeetingAvailableSeats } from './MeetingAvailableSeats';
 
 export interface MeetingProps {
   title: MeetingTitle;
   description: MeetingDescription;
   startsAt: Date;
-  attendees?: Attendee[];
+  attendees?: Attendees;
+  remainingSeats?: MeetingRemainingSeats;
+  availableSeats: MeetingAvailableSeats;
   createdBy: UserName;
   createdAt?: Date;
 }
@@ -34,8 +39,16 @@ export class Meeting extends Entity<MeetingProps> {
     return this.props.startsAt;
   }
 
-  get attendees(): Attendee[] {
+  get attendees(): Attendees {
     return this.props.attendees;
+  }
+
+  get remainingSeats(): MeetingRemainingSeats {
+    return this.props.remainingSeats;
+  }
+
+  get availableSeats(): MeetingAvailableSeats {
+    return this.props.availableSeats;
   }
 
   get createdBy(): UserName {
@@ -46,22 +59,25 @@ export class Meeting extends Entity<MeetingProps> {
     return this.props.createdBy;
   }
 
-  addAttendee(...attendees: Attendee[]): void {
-    this.props.attendees.push(...attendees);
-  }
-
   // eslint-disable-next-line no-useless-constructor
   private constructor(props: MeetingProps, id?: UniqueID) {
     super(props, id);
   }
 
-  public static create(props: MeetingProps, id?: UniqueID): Result<Meeting, void> {
+  public static async create(props: MeetingProps, id?: UniqueID): Promise<Result<Meeting, void>> {
     const defaultProps: MeetingProps = {
       ...props,
-      attendees: props.attendees || [],
+      attendees: props.attendees || Attendees.create(),
       createdAt: props.createdAt || new Date(),
+      remainingSeats:
+        props.remainingSeats ||
+        (await MeetingRemainingSeats.create(props.availableSeats.value)).unwrap(),
     };
     const meeting = new Meeting(defaultProps, id);
     return Ok(meeting);
+  }
+
+  public addAttendee(attendee: Attendee): void {
+    this.props.attendees.add(attendee);
   }
 }

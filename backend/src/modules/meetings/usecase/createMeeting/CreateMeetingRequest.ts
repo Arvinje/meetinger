@@ -3,4 +3,5 @@ export interface CreateMeetingRequest {
   organizer: string;
   description: string;
   startsAt: string;
+  availableSeats: number;
 }
