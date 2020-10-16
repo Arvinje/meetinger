@@ -39,6 +39,8 @@ export class LeaveMeetingUseCase implements UseCase<LeaveMeetingRequest, Promise
       return Err(UnexpectedError.wrap(error));
     }
 
+    if (attendee.isOrganizer) return Err(UnexpectedError.create('operation not permitted'));
+
     meeting.removeAttendee(attendee);
 
     try {
