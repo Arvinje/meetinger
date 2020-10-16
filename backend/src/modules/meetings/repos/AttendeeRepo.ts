@@ -1,5 +1,6 @@
-import { Attendee } from '@meetings/domain/Attendee';
+import { UserName } from '@users/domain/UserName';
+import { MeetingID } from '@meetings/domain/MeetingID';
 
-export interface MeetingRepo {
-  AddAttendees(meeting: Attendee): Promise<void>;
+export interface AttendeeRepo {
+  exists(username: UserName, meetingID: MeetingID): Promise<boolean>;
 }
