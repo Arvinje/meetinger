@@ -5,6 +5,8 @@ import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
 import { MeetingDescription } from '@meetings/domain/MeetingDescription';
 import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
 import { MeetingTitle } from '@meetings/domain/MeetingTitle';
+import { PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb';
+import moment from 'moment';
 
 export interface RawMeetingProps {
   id: string;
@@ -39,5 +41,21 @@ export class MeetingMap {
     );
 
     return meeting.unwrap();
+  }
+
+  public static toDynamoFull(meeting: Meeting): PutItemInputAttributeMap {
+    const startsAt = moment(meeting.startsAt);
+    return {
+      PK: { S: meeting.id.id.toString() },
+      SK: { S: 'META' },
+      GSI1PK: { S: `${startsAt.year()}-${startsAt.month()}#MEETINGS` },
+      GSI1SK: { S: meeting.startsAt.toISOString() },
+      GSI2PK: { S: `${meeting.createdBy.value}#MEETINGS` },
+      GSI2SK: { S: meeting.startsAt.toISOString() },
+      Title: { S: meeting.title.value },
+      Description: { S: meeting.description.value },
+      RemainingSeats: { N: meeting.remainingSeats.value.toString() },
+      AvailableSeats: { N: meeting.availableSeats.value.toString() },
+    };
   }
 }

@@ -10,14 +10,9 @@ import { DDBConfigProps, DDBTables } from '@src/shared/infra/dynamodb/dynamodb';
 import { Meeting } from '@meetings/domain/Meeting';
 import { Attendee } from '@meetings/domain/Attendee';
 import { UnexpectedError } from '@src/shared/core/AppError';
-import { UserName } from '@src/modules/users/domain/UserName';
 import { MeetingID } from '@meetings/domain/MeetingID';
-import { MeetingDescription } from '@meetings/domain/MeetingDescription';
-import { MeetingTitle } from '@meetings/domain/MeetingTitle';
-import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
-import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
+import { MeetingMap } from '@meetings/mappers/MeetingMap';
 import { MeetingRepo } from '../MeetingRepo';
-import { MeetingMap } from '../../mappers/MeetingMap';
 
 export class DynamoDBMeetingRepo implements MeetingRepo {
   private client: DynamoDB;
@@ -33,23 +28,10 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
     const items: TransactWriteItemList = [];
 
     // Meeting item
-    const startsAt = moment(meeting.startsAt);
-    const meetingItem: PutItemInputAttributeMap = {
-      PK: { S: meeting.id.id.toString() },
-      SK: { S: 'META' },
-      GSI1PK: { S: `${startsAt.year()}-${startsAt.month()}#MEETINGS` },
-      GSI1SK: { S: meeting.startsAt.toISOString() },
-      GSI2PK: { S: `${meeting.createdBy.value}#MEETINGS` },
-      GSI2SK: { S: meeting.startsAt.toISOString() },
-      Title: { S: meeting.title.value },
-      Description: { S: meeting.description.value },
-      RemainingSeats: { N: meeting.remainingSeats.value.toString() },
-      AvailableSeats: { N: meeting.availableSeats.value.toString() },
-    };
     items.push({
       Put: {
         TableName: this.tables.MainTable,
-        Item: meetingItem,
+        Item: MeetingMap.toDynamoFull(meeting),
         ConditionExpression: 'attribute_not_exists(#PK)',
         ExpressionAttributeNames: {
           '#PK': 'PK',
