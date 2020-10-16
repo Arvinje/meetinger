@@ -1,9 +1,7 @@
-import moment from 'moment';
 import DynamoDB, {
   GetItemInput,
   GetItemOutput,
   Key,
-  PutItemInputAttributeMap,
   TransactWriteItemList,
 } from 'aws-sdk/clients/dynamodb';
 import { DDBConfigProps, DDBTables } from '@src/shared/infra/dynamodb/dynamodb';
@@ -12,6 +10,7 @@ import { Attendee } from '@meetings/domain/Attendee';
 import { UnexpectedError } from '@src/shared/core/AppError';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { MeetingMap } from '@meetings/mappers/MeetingMap';
+import { AttendeeMap } from '@meetings/mappers/AttendeeMap';
 import { MeetingRepo } from '../MeetingRepo';
 
 export class DynamoDBMeetingRepo implements MeetingRepo {
@@ -41,21 +40,10 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
 
     // Attendees item(s)
     meeting.attendees.getNewItems().forEach((attendee: Attendee) => {
-      const attendeeItem: PutItemInputAttributeMap = {
-        PK: { S: meeting.id.id.toString() },
-        SK: { S: `ATTENDEE#${attendee.joinedMeetingOn.toISOString()}` },
-        GSI1PK: { S: `${attendee.username.value}#MEETINGS` },
-        GSI1SK: { S: meeting.startsAt.toISOString() },
-        GSI2PK: { S: meeting.id.id.toString() },
-        GSI2SK: { S: `ATTENDEE#${attendee.username.value}` },
-        Title: { S: meeting.title.value },
-        FullName: { S: attendee.fullName.value },
-        IsOrganizer: { BOOL: attendee.isOrganizer },
-      };
       items.push({
         Put: {
           TableName: this.tables.MainTable,
-          Item: attendeeItem,
+          Item: AttendeeMap.toDynamoFull(attendee, meeting),
           ConditionExpression: 'attribute_not_exists(#PK)',
           ExpressionAttributeNames: {
             '#PK': 'PK',
@@ -83,7 +71,7 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
       meeting.attendees.getRemovedItems().length - meeting.attendees.getNewItems().length;
 
     // Meeting item
-    const meetingKey: PutItemInputAttributeMap = {
+    const meetingKey: Key = {
       PK: { S: meeting.id.id.toString() },
       SK: { S: 'META' },
     };
@@ -120,21 +108,10 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
 
     // Attendees to add
     meeting.attendees.getNewItems().forEach((attendee: Attendee) => {
-      const attendeeItem: PutItemInputAttributeMap = {
-        PK: { S: meeting.id.id.toString() },
-        SK: { S: `ATTENDEE#${attendee.joinedMeetingOn.toISOString()}` },
-        GSI1PK: { S: `${attendee.username.value}#MEETINGS` },
-        GSI1SK: { S: meeting.startsAt.toISOString() },
-        GSI2PK: { S: meeting.id.id.toString() },
-        GSI2SK: { S: `ATTENDEE#${attendee.username.value}` },
-        Title: { S: meeting.title.value },
-        FullName: { S: attendee.fullName.value },
-        IsOrganizer: { BOOL: attendee.isOrganizer },
-      };
       items.push({
         Put: {
           TableName: this.tables.MainTable,
-          Item: attendeeItem,
+          Item: AttendeeMap.toDynamoFull(attendee, meeting),
           ConditionExpression: 'attribute_not_exists(#PK)',
           ExpressionAttributeNames: {
             '#PK': 'PK',
