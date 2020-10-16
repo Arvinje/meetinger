@@ -17,6 +17,7 @@ import { MeetingTitle } from '@meetings/domain/MeetingTitle';
 import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
 import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
 import { MeetingRepo } from '../MeetingRepo';
+import { MeetingMap } from '../../mappers/MeetingMap';
 
 export class DynamoDBMeetingRepo implements MeetingRepo {
   private client: DynamoDB;
@@ -201,50 +202,14 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
       throw UnexpectedError.wrap(error, `Failed to fetch meeting(#${meetingID.id.toString()})`);
     }
 
-    const titleOrError = await MeetingTitle.create(queryResult.Item.Title.S);
-    if (titleOrError.isErr())
-      throw UnexpectedError.wrap(titleOrError.unwrapErr(), 'Failed to create MeetingTitle');
-
-    const descOrError = await MeetingDescription.create(queryResult.Item.Description.S);
-    if (titleOrError.isErr())
-      throw UnexpectedError.wrap(titleOrError.unwrapErr(), 'Failed to create MeetingDescription');
-
-    const startsAt = new Date(queryResult.Item.GSI1SK.S);
-
-    const organizerOrError = await UserName.create(queryResult.Item.GSI2PK.S.split('#')[0]);
-    if (organizerOrError.isErr())
-      throw UnexpectedError.wrap(titleOrError.unwrapErr(), 'Failed to create MeetingOrganizer');
-
-    const availableSeatsOrError = await MeetingAvailableSeats.create(
-      Number(queryResult.Item.AvailableSeats.N)
-    );
-    if (availableSeatsOrError.isErr())
-      throw UnexpectedError.wrap(
-        titleOrError.unwrapErr(),
-        'Failed to create MeetingAvailableSeats'
-      );
-
-    const remainingSeatsOrError = await MeetingRemainingSeats.create(
-      Number(queryResult.Item.RemainingSeats.N)
-    );
-    if (remainingSeatsOrError.isErr())
-      throw UnexpectedError.wrap(
-        titleOrError.unwrapErr(),
-        'Failed to create MeetingRemainingSeats'
-      );
-
-    const meeting = await Meeting.create(
-      {
-        title: titleOrError.unwrap(),
-        description: descOrError.unwrap(),
-        startsAt,
-        createdBy: organizerOrError.unwrap(),
-        remainingSeats: remainingSeatsOrError.unwrap(),
-        availableSeats: availableSeatsOrError.unwrap(),
-      },
-      meetingID.id
-    );
-
-    return meeting.unwrap();
+    return MeetingMap.toDomain({
+      id: meetingID.id.toString(),
+      title: queryResult.Item.Title.S,
+      description: queryResult.Item.Description.S,
+      startsAt: queryResult.Item.GSI1SK.S,
+      createdBy: queryResult.Item.GSI2PK.S.split('#')[0],
+      remainingSeats: Number(queryResult.Item.RemainingSeats.N),
+      availableSeats: Number(queryResult.Item.AvailableSeats.N),
+    });
   }
 }
