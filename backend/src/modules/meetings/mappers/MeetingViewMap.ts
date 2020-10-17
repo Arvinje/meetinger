@@ -5,7 +5,6 @@ import { AttendeeDetailsMap } from './AttendeeDetailsMap';
 
 export class MeetingViewMap {
   public static dynamoToDomain(rawItems: AttributeMap[]): MeetingView {
-    console.log(JSON.stringify(rawItems));
     const [rawMeetinView, ...rawAttendeesDetails] = rawItems;
 
     const attendeesDetails = rawAttendeesDetails.map((rawDetails) =>

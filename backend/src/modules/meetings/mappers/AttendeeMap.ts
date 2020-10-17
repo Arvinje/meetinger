@@ -16,7 +16,7 @@ export class AttendeeMap {
 
     const fullName = (await UserFullName.create(raw.FullName.S)).unwrap();
     const joinedMeetingOn = new Date(raw.SK.S.split('#')[1]);
-    const isOrganizer = !!raw.IsOrganizer;
+    const isOrganizer = raw.IsOrganizer ? !!raw.IsOrganizer.BOOL : false;
 
     return Attendee.create({
       username,
