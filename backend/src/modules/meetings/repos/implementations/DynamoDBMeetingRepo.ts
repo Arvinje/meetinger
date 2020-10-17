@@ -2,6 +2,8 @@ import DynamoDB, {
   GetItemInput,
   GetItemOutput,
   Key,
+  QueryInput,
+  QueryOutput,
   TransactWriteItemList,
 } from 'aws-sdk/clients/dynamodb';
 import { DDBConfigProps, DDBTables } from '@src/shared/infra/dynamodb/dynamodb';
@@ -11,6 +13,8 @@ import { UnexpectedError } from '@src/shared/core/AppError';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { MeetingMap } from '@meetings/mappers/MeetingMap';
 import { AttendeeMap } from '@meetings/mappers/AttendeeMap';
+import { MeetingView } from '@meetings/domain/MeetingView';
+import { MeetingViewMap } from '@meetings/mappers/MeetingViewMap';
 import { MeetingRepo } from '../MeetingRepo';
 
 export class DynamoDBMeetingRepo implements MeetingRepo {
@@ -162,5 +166,30 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
     }
 
     return MeetingMap.dynamoToDomain(queryResult.Item);
+  }
+
+  async fetchMeetingView(meetingID: MeetingID): Promise<MeetingView> {
+    const input: QueryInput = {
+      TableName: this.tables.MainTable,
+      KeyConditionExpression: '#PK = :PK',
+      ScanIndexForward: false,
+      ExpressionAttributeNames: {
+        '#PK': 'PK',
+      },
+      ExpressionAttributeValues: {
+        ':PK': {
+          S: meetingID.id.toString(),
+        },
+      },
+    };
+
+    let queryResult: QueryOutput;
+    try {
+      queryResult = await this.client.query(input).promise();
+    } catch (error) {
+      throw UnexpectedError.wrap(error, `Failed to fetch meeting(#${meetingID.id.toString()})`);
+    }
+
+    return MeetingViewMap.dynamoToDomain(queryResult.Items);
   }
 }
