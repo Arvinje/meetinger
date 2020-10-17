@@ -32,6 +32,6 @@ export class LeaveMeetingController extends BaseController {
       }
     }
 
-    return this.ok<void>();
+    return this.noContent();
   }
 }

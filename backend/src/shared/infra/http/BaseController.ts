@@ -21,6 +21,10 @@ export abstract class BaseController {
     return BaseController.json(201, body);
   }
 
+  protected noContent(): APIGatewayProxyResult {
+    return BaseController.json(204);
+  }
+
   protected unauthorized<TResponse>(body?: TResponse): APIGatewayProxyResult {
     return BaseController.json(401, body);
   }
