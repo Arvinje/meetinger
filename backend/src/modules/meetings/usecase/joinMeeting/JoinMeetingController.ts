@@ -4,6 +4,7 @@ import { BaseController } from '@src/shared/infra/http/BaseController';
 import { APIGatewayWithAuthorizerEvent } from '@src/shared/infra/http/types';
 import { ValidationError } from '@src/shared/core/AppError';
 import { BaseErrorResponse } from '@src/shared/core/BaseError';
+import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
 import { JoinMeetingUseCase } from './JoinMeetingUseCase';
 
 export class JoinMeetingController extends BaseController {
@@ -27,11 +28,14 @@ export class JoinMeetingController extends BaseController {
         case ValidationError.type:
           return this.unprocessableEntity<BaseErrorResponse>((error as ValidationError).toResponse);
 
+        case MeetingNotFoundError.type:
+          return this.notFound<BaseErrorResponse>((error as MeetingNotFoundError).toResponse);
+
         default:
           return this.internalError<BaseErrorResponse>(error.toResponse);
       }
     }
 
-    return this.ok<void>();
+    return this.created<void>();
   }
 }

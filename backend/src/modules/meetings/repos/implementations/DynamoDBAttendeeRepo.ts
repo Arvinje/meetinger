@@ -5,6 +5,7 @@ import { UserName } from '@src/modules/users/domain/UserName';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { Attendee } from '@meetings/domain/Attendee';
 import { AttendeeMap } from '@meetings/mappers/AttendeeMap';
+import { AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
 import { AttendeeRepo } from '../AttendeeRepo';
 
 export class DynamoDBAttendeeRepo implements AttendeeRepo {
@@ -42,7 +43,10 @@ export class DynamoDBAttendeeRepo implements AttendeeRepo {
     try {
       queryResult = await this.client.query(input).promise();
     } catch (error) {
-      throw UnexpectedError.wrap(error, 'Failed to create new meeting item(s)');
+      throw UnexpectedError.wrap(
+        error,
+        `Failed to fetch attendee(${username.value}) of meeting(${meetingID.id.toString()})`
+      );
     }
 
     return queryResult.Count === 1;
@@ -72,10 +76,13 @@ export class DynamoDBAttendeeRepo implements AttendeeRepo {
     try {
       queryResult = await this.client.query(input).promise();
     } catch (error) {
-      throw UnexpectedError.wrap(error, 'Failed to create new meeting item(s)');
+      throw UnexpectedError.wrap(
+        error,
+        `Failed to fetch attendee(${username.value}) of meeting(${meetingID.id.toString()})`
+      );
     }
 
-    if (queryResult.Count !== 1) throw UnexpectedError.create('Not Found');
+    if (queryResult.Count !== 1) throw AttendeeNotFoundError.create();
 
     return AttendeeMap.dynamoToDomain(queryResult.Items[0]);
   }

@@ -10,9 +10,10 @@ import { UniqueID } from '@src/shared/domain/uniqueId';
 import { User } from '@src/modules/users/domain/User';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
+import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
 import { JoinMeetingRequest } from './JoinMeetingRequest';
 
-type Response = Result<void, ValidationError | UnexpectedError>;
+type Response = Result<void, MeetingNotFoundError | ValidationError | UnexpectedError>;
 
 export class JoinMeetingUseCase implements UseCase<JoinMeetingRequest, Promise<Response>> {
   private meetingRepo: MeetingRepo;
@@ -47,6 +48,7 @@ export class JoinMeetingUseCase implements UseCase<JoinMeetingRequest, Promise<R
     try {
       meeting = await this.meetingRepo.fetchMeetingByID(meetingID);
     } catch (error) {
+      if (error instanceof MeetingNotFoundError) return Err(error);
       return Err(UnexpectedError.wrap(error));
     }
 

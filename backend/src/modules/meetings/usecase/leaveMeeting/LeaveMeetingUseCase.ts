@@ -8,9 +8,19 @@ import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { UniqueID } from '@src/shared/domain/uniqueId';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
+import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
+import { AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
 import { LeaveMeetingRequest } from './LeaveMeetingRequest';
+import { OrganizerCannotLeaveError } from './LeaveMeetingErrors';
 
-type Response = Result<void, ValidationError | UnexpectedError>;
+type Response = Result<
+  void,
+  | MeetingNotFoundError
+  | AttendeeNotFoundError
+  | OrganizerCannotLeaveError
+  | ValidationError
+  | UnexpectedError
+>;
 
 export class LeaveMeetingUseCase implements UseCase<LeaveMeetingRequest, Promise<Response>> {
   private meetingRepo: MeetingRepo;
@@ -36,10 +46,17 @@ export class LeaveMeetingUseCase implements UseCase<LeaveMeetingRequest, Promise
         this.meetingRepo.fetchMeetingByID(meetingID),
       ]);
     } catch (error) {
-      return Err(UnexpectedError.wrap(error));
+      switch (error.type) {
+        case AttendeeNotFoundError.type:
+        case MeetingNotFoundError.type:
+          return Err<never, MeetingNotFoundError | AttendeeNotFoundError>(error);
+
+        default:
+          return Err(UnexpectedError.wrap(error));
+      }
     }
 
-    if (attendee.isOrganizer) return Err(UnexpectedError.create('operation not permitted'));
+    if (attendee.isOrganizer) return Err(OrganizerCannotLeaveError.create());
 
     meeting.removeAttendee(attendee);
 

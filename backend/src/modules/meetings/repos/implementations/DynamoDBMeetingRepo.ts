@@ -15,6 +15,7 @@ import { MeetingMap } from '@meetings/mappers/MeetingMap';
 import { AttendeeMap } from '@meetings/mappers/AttendeeMap';
 import { MeetingView } from '@meetings/domain/MeetingView';
 import { MeetingViewMap } from '@meetings/mappers/MeetingViewMap';
+import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
 import { MeetingRepo } from '../MeetingRepo';
 
 export class DynamoDBMeetingRepo implements MeetingRepo {
@@ -165,6 +166,8 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
       throw UnexpectedError.wrap(error, `Failed to fetch meeting(#${meetingID.id.toString()})`);
     }
 
+    if (!queryResult.Item) throw MeetingNotFoundError.create();
+
     return MeetingMap.dynamoToDomain(queryResult.Item);
   }
 
@@ -189,6 +192,8 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
     } catch (error) {
       throw UnexpectedError.wrap(error, `Failed to fetch meeting(#${meetingID.id.toString()})`);
     }
+
+    if (queryResult.Count < 2) throw MeetingNotFoundError.create();
 
     return MeetingViewMap.dynamoToDomain(queryResult.Items);
   }

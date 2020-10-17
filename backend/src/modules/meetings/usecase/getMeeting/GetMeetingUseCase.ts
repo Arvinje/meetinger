@@ -7,9 +7,10 @@ import { MeetingID } from '@meetings/domain/MeetingID';
 import { MeetingView } from '@meetings/domain/MeetingView';
 import { MeetingViewMap } from '@meetings/mappers/MeetingViewMap';
 import { MeetingViewDTO } from '@meetings/dtos/MeetingViewDTO';
+import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
 import { GetMeetingRequest } from './GetMeetingRequest';
 
-type Response = Result<MeetingViewDTO, UnexpectedError>;
+type Response = Result<MeetingViewDTO, MeetingNotFoundError | UnexpectedError>;
 
 export class GetMeetingUseCase implements UseCase<GetMeetingRequest, Promise<Response>> {
   private meetingRepo: MeetingRepo;
@@ -25,6 +26,7 @@ export class GetMeetingUseCase implements UseCase<GetMeetingRequest, Promise<Res
     try {
       meetingView = await this.meetingRepo.fetchMeetingView(meetingID);
     } catch (error) {
+      if (error instanceof MeetingNotFoundError) return Err(error);
       return Err(UnexpectedError.wrap(error));
     }
 

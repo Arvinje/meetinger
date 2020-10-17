@@ -5,6 +5,7 @@ import { APIGatewayWithAuthorizerEvent } from '@src/shared/infra/http/types';
 import { ValidationError } from '@src/shared/core/AppError';
 import { BaseErrorResponse } from '@src/shared/core/BaseError';
 import { MeetingViewDTO } from '@meetings/dtos/MeetingViewDTO';
+import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
 import { GetMeetingUseCase } from './GetMeetingUseCase';
 
 export class GetMeetingController extends BaseController {
@@ -26,6 +27,9 @@ export class GetMeetingController extends BaseController {
       switch (error.type) {
         case ValidationError.type:
           return this.unprocessableEntity<BaseErrorResponse>((error as ValidationError).toResponse);
+
+        case MeetingNotFoundError.type:
+          return this.notFound<BaseErrorResponse>((error as MeetingNotFoundError).toResponse);
 
         default:
           return this.internalError<BaseErrorResponse>(error.toResponse);

@@ -10,6 +10,7 @@ import { Meeting } from '@meetings/domain/Meeting';
 import { Attendee } from '@meetings/domain/Attendee';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
+import { User } from '@src/modules/users/domain/User';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
 
@@ -54,29 +55,30 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
       })
     ).unwrap();
 
+    let organizer: User;
     try {
-      const organizer = await this.userRepo.findByUserName(organizerOrError.unwrap());
-      const organizerAsAttendee = Attendee.create({
-        username: organizer.username,
-        fullName: organizer.fullName,
-        meetingID: meeting.id,
-        joinedMeetingOn: new Date(),
-        isOrganizer: true,
-      }).unwrap();
+      organizer = await this.userRepo.findByUserName(organizerOrError.unwrap());
+    } catch (error) {
+      return Err(UnexpectedError.wrap(error));
+    }
 
-      meeting.addAttendee(organizerAsAttendee);
+    const organizerAsAttendee = Attendee.create({
+      username: organizer.username,
+      fullName: organizer.fullName,
+      meetingID: meeting.id,
+      joinedMeetingOn: new Date(),
+      isOrganizer: true,
+    }).unwrap();
 
+    meeting.addAttendee(organizerAsAttendee);
+
+    try {
       await this.meetingRepo.create(meeting);
-      return Ok({
+      return Ok<CreateMeetingResponse>({
         id: meeting.id.id.toString(),
       });
     } catch (error) {
-      return Err(
-        UnexpectedError.wrap(
-          error,
-          'An unexpected error occured when executing CreateMeetingUseCase'
-        )
-      );
+      return Err(UnexpectedError.wrap(error));
     }
   }
 }
