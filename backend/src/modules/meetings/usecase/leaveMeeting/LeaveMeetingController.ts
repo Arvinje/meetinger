@@ -4,6 +4,7 @@ import { BaseController } from '@src/shared/infra/http/BaseController';
 import { APIGatewayWithAuthorizerEvent } from '@src/shared/infra/http/types';
 import { ValidationError } from '@src/shared/core/AppError';
 import { BaseErrorResponse } from '@src/shared/core/BaseError';
+import { OrganizerCannotLeaveError } from './LeaveMeetingErrors';
 import { LeaveMeetingUseCase } from './LeaveMeetingUseCase';
 
 export class LeaveMeetingController extends BaseController {
@@ -26,6 +27,11 @@ export class LeaveMeetingController extends BaseController {
       switch (error.type) {
         case ValidationError.type:
           return this.unprocessableEntity<BaseErrorResponse>((error as ValidationError).toResponse);
+
+        case OrganizerCannotLeaveError.type:
+          return this.unprocessableEntity<BaseErrorResponse>(
+            (error as OrganizerCannotLeaveError).toResponse
+          );
 
         default:
           return this.internalError<BaseErrorResponse>(error.toResponse);
