@@ -26,8 +26,8 @@ export class UnAuthorizedError extends BaseError {
     return new UnAuthorizedError(this.type, null, message);
   }
 
-  public static wrap(error: unknown, message: string): UnexpectedError {
-    return new UnexpectedError(this.type, error, message);
+  public static wrap(error: unknown, message: string): UnAuthorizedError {
+    return new UnAuthorizedError(this.type, error, message);
   }
 }
 
@@ -38,7 +38,7 @@ export class ValidationError extends BaseError {
     return new ValidationError(this.type, null, message);
   }
 
-  public static wrap(error: unknown, message: string): UnexpectedError {
-    return new UnexpectedError(this.type, error, message);
+  public static wrap(error: unknown, message: string): ValidationError {
+    return new ValidationError(this.type, error, message);
   }
 }
