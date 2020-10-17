@@ -143,3 +143,13 @@ functions:
           path: meetings/{id}/attendance
           method: delete
           authorizer: *authorizer
+  
+  GetMeeting:
+    handler: src/modules/meetings/usecase/getMeeting/index.handler
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}
+    events:
+      - http:
+          path: meetings/{id}
+          method: get
+          authorizer: *authorizer
