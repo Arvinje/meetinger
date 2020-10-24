@@ -5,5 +5,9 @@
         "**/.DS_Store": true,
         "**/node_modules": true,
     },
-    "terraform-ls.rootModules": [ "./infrastructure" ]
+    "terraform-ls.rootModules": [
+        "./infrastructure/environments/dev/eu-central-1",
+        "./infrastructure/modules/dynamodb",
+        "./infrastructure/modules/cognito",
+    ]
 }

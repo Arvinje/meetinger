@@ -1,4 +1,4 @@
-service: minutes
+service: meetinger
 
 frameworkVersion: "=1.74.1"
 
@@ -8,8 +8,8 @@ package:
    - ./**
 
 custom:
-  mainTableArn: ${ssm:/dynamodb/minutes/main_table_arn~true}
-  mainTableName: ${ssm:/dynamodb/minutes/main_table_name~true}
+  mainTableArn: ${ssm:/dynamodb/${self:service}/${self:provider.stage}/main_table_arn~true}
+  mainTableName: ${ssm:/dynamodb/${self:service}/${self:provider.stage}/main_table_name~true}
   webpack:
     packager: yarn
     webpackConfig: ./webpack.config.js
@@ -53,7 +53,7 @@ provider:
     Stage: ${self:provider.stage}
     Region: ${self:provider.region}
     Version: ${file(./package.json):version}
-    Project: minutes
+    Project: meetinger
 
   iamRoleStatements:
     - Effect: Allow
@@ -77,7 +77,7 @@ functions:
   RestAuth:
     handler: src/handlers/authorizer/restHandler.handle
     environment:
-      ISS: ${ssm:/cognito-user-pool/minutes/iss~true}
+      ISS: ${ssm:/cognito-user-pool/${self:service}/${self:provider.stage}/iss~true}
 
   UserRegister:
     handler: src/handlers/cognito/postConfirmation.handle
@@ -85,14 +85,14 @@ functions:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
     events:
       - cognitoUserPool:
-          pool: minutes_user_pool
+          pool: ${self:service}_user_pool_${self:provider.stage}
           trigger: PostConfirmation
           existing: true
 
   WebsocketAuth:
     handler: src/handlers/authorizer/wsHandler.handle
     environment:
-      ISS: ${ssm:/cognito-user-pool/minutes/iss~true}
+      ISS: ${ssm:/cognito-user-pool/${self:service}/${self:provider.stage}/iss~true}
 
   WebsocketConnect:
     handler: src/handlers/websockets/connect.handle
