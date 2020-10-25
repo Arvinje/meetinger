@@ -153,3 +153,13 @@ functions:
           path: meetings/{id}
           method: get
           authorizer: *authorizer
+
+  GetAttendance:
+    handler: src/modules/meetings/usecase/getAttendance/index.handler
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}
+    events:
+      - http:
+          path: meetings/{id}/attendance
+          method: get
+          authorizer: *authorizer
