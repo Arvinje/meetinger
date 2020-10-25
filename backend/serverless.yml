@@ -107,7 +107,7 @@ functions:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
   
   WebsocketDisconnect:
-    handler: src/handlers/websockets/disconnect.handle
+    handler: src/modules/connection/usecase/deleteConnection/index.handler
     events:
       - websocket: 
           route: $disconnect
