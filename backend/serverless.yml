@@ -95,7 +95,7 @@ functions:
       ISS: ${ssm:/cognito-user-pool/${self:service}/${self:provider.stage}/iss~true}
 
   WebsocketConnect:
-    handler: src/handlers/websockets/connect.handle
+    handler: src/modules/connection/usecase/createConnection/index.handler
     events:
       - websocket: 
           route: $connect

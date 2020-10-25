@@ -1,4 +1,4 @@
-export interface CreateConnectionDTO {
+export interface CreateConnectionRequest {
   id: string;
   userId?: string;
   username?: string;
