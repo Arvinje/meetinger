@@ -22,7 +22,7 @@ custom:
     automatic: true
     number: 3
   <<: &authorizer
-    name: RestAuth
+    name: AuthorizeUser
     managedExternally: false
     resultTtlInSeconds: 300
     identitySource: method.request.header.Authorization
@@ -74,8 +74,8 @@ provider:
 
 
 functions:
-  RestAuth:
-    handler: src/handlers/authorizer/restHandler.handle
+  AuthorizeUser:
+    handler: src/modules/users/usecase/authorizeUser/index.handler
     environment:
       ISS: ${ssm:/cognito-user-pool/${self:service}/${self:provider.stage}/iss~true}
 
@@ -89,18 +89,13 @@ functions:
           trigger: PostConfirmation
           existing: true
 
-  WebsocketAuth:
-    handler: src/handlers/authorizer/wsHandler.handle
-    environment:
-      ISS: ${ssm:/cognito-user-pool/${self:service}/${self:provider.stage}/iss~true}
-
   WebsocketConnect:
     handler: src/modules/connection/usecase/createConnection/index.handler
     events:
       - websocket: 
           route: $connect
           authorizer: 
-            name: WebsocketAuth
+            name: AuthorizeUser
             identitySource:
               - 'route.request.querystring.Auth'
     environment:
