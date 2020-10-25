@@ -80,7 +80,7 @@ functions:
       ISS: ${ssm:/cognito-user-pool/${self:service}/${self:provider.stage}/iss~true}
 
   UserRegister:
-    handler: src/handlers/cognito/postConfirmation.handle
+    handler: src/modules/users/usecase/createUser/index.handler
     environment:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
     events:
