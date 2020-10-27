@@ -4,6 +4,7 @@
   "scripts": {
     "test": "NODE_ENV=test ./node_modules/.bin/jest --ci --verbose",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --config prettier.config.js 'src/**/*.ts' --write",
     "build": "tsc -b .",
     "package": "serverless package",
@@ -31,6 +32,7 @@
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",
     "@types/aws-lambda": "^8.10.57",
+    "@types/jest": "^26.0.15",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/jwk-to-pem": "^2.0.0",
     "@types/nanoid": "^2.1.0",
