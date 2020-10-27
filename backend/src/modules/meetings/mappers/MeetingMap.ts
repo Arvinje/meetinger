@@ -45,7 +45,7 @@ export class MeetingMap {
     return {
       PK: { S: meeting.id.id.toString() },
       SK: { S: 'META' },
-      GSI1PK: { S: `${meeting.location.value}#${startsAt.year()}-${startsAt.month()}#MEETINGS` },
+      GSI1PK: { S: `${meeting.location.value}#${startsAt.format('YYYY-MM')}#MEETINGS` },
       GSI1SK: { S: meeting.startsAt.toISOString() },
       GSI2PK: { S: `${meeting.createdBy.value}#MEETINGS` },
       GSI2SK: { S: meeting.startsAt.toISOString() },
