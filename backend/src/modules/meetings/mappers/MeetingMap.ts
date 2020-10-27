@@ -7,6 +7,7 @@ import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
 import { MeetingDescription } from '@meetings/domain/MeetingDescription';
 import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
 import { MeetingTitle } from '@meetings/domain/MeetingTitle';
+import { MeetingLocation } from '../domain/MeetingLocation';
 
 export class MeetingMap {
   public static async dynamoToDomain(raw: AttributeMap): Promise<Meeting> {
@@ -14,6 +15,7 @@ export class MeetingMap {
     const title = (await MeetingTitle.create(raw.Title.S)).unwrap();
     const description = (await MeetingDescription.create(raw.Description.S)).unwrap();
     const startsAt = new Date(raw.GSI1SK.S);
+    const location = (await MeetingLocation.create(raw.GSI1PK.S.split('#')[0])).unwrap();
     const createdBy = (await UserName.create(raw.GSI2PK.S.split('#')[0])).unwrap();
     const availableSeats = (
       await MeetingAvailableSeats.create(Number(raw.AvailableSeats.N))
@@ -27,6 +29,7 @@ export class MeetingMap {
         title,
         description,
         startsAt,
+        location,
         createdBy,
         remainingSeats,
         availableSeats,
@@ -42,7 +45,7 @@ export class MeetingMap {
     return {
       PK: { S: meeting.id.id.toString() },
       SK: { S: 'META' },
-      GSI1PK: { S: `${startsAt.year()}-${startsAt.month()}#MEETINGS` },
+      GSI1PK: { S: `${meeting.location.value}#${startsAt.year()}-${startsAt.month()}#MEETINGS` },
       GSI1SK: { S: meeting.startsAt.toISOString() },
       GSI2PK: { S: `${meeting.createdBy.value}#MEETINGS` },
       GSI2SK: { S: meeting.startsAt.toISOString() },

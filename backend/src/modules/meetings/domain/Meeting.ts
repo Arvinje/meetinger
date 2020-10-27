@@ -9,11 +9,13 @@ import { Attendee } from './Attendee';
 import { Attendees } from './Attendees';
 import { MeetingRemainingSeats } from './MeetingRemainingSeats';
 import { MeetingAvailableSeats } from './MeetingAvailableSeats';
+import { MeetingLocation } from './MeetingLocation';
 
 export interface MeetingProps {
   title: MeetingTitle;
   description: MeetingDescription;
   startsAt: Date;
+  location: MeetingLocation;
   attendees?: Attendees;
   remainingSeats?: MeetingRemainingSeats;
   availableSeats: MeetingAvailableSeats;
@@ -37,6 +39,10 @@ export class Meeting extends Entity<MeetingProps> {
 
   get startsAt(): Date {
     return this.props.startsAt;
+  }
+
+  get location(): MeetingLocation {
+    return this.props.location;
   }
 
   get attendees(): Attendees {

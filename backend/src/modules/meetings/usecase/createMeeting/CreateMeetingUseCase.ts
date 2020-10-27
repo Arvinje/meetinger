@@ -13,6 +13,7 @@ import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
 import { User } from '@src/modules/users/domain/User';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
+import { MeetingLocation } from '../../domain/MeetingLocation';
 
 type Response = Result<CreateMeetingResponse, ValidationError | UnexpectedError>;
 
@@ -40,6 +41,9 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
     if (!startsAtOrError.isValid())
       return Err(ValidationError.create('Meeting start time is not valid'));
 
+    const locationOrError = await MeetingLocation.create(request.location);
+    if (locationOrError.isErr()) return Err(locationOrError.unwrapErr());
+
     const availableSeatsOrError = await MeetingAvailableSeats.create(request.availableSeats);
     if (availableSeatsOrError.isErr()) {
       return Err(ValidationError.create('Count of available seats is not valid'));
@@ -50,6 +54,7 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
         title: titleOrError.unwrap(),
         description: descOrError.unwrap(),
         startsAt: startsAtOrError.toDate(),
+        location: locationOrError.unwrap(),
         createdBy: organizerOrError.unwrap(),
         availableSeats: availableSeatsOrError.unwrap(),
       })
