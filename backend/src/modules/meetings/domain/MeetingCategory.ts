@@ -7,7 +7,7 @@ interface MeetingCategoryProps {
   category: string;
 }
 
-type Response = Result<MeetingCategory, ValidationError | UnexpectedError>;
+export type Response = Result<MeetingCategory, ValidationError | UnexpectedError>;
 
 const supportedCategories = ['Social', 'Technology'];
 

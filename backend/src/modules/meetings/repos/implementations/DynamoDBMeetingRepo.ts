@@ -17,6 +17,10 @@ import { MeetingView } from '@meetings/domain/MeetingView';
 import { MeetingViewMap } from '@meetings/mappers/MeetingViewMap';
 import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
 import { MeetingRepo } from '../MeetingRepo';
+import { MeetingItemView } from '../../domain/MeetingItemView';
+import { MeetingCategory } from '../../domain/MeetingCategory';
+import { MeetingLocation } from '../../domain/MeetingLocation';
+import { MeetingItemViewMap } from '../../mappers/MeetingItemViewMap';
 
 export class DynamoDBMeetingRepo implements MeetingRepo {
   private client: DynamoDB;
@@ -196,5 +200,54 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
     if (queryResult.Count < 2) throw MeetingNotFoundError.create();
 
     return MeetingViewMap.dynamoToDomain(queryResult.Items);
+  }
+
+  async fetchMeetingItemViews(
+    location: MeetingLocation,
+    month: string,
+    category?: MeetingCategory
+  ): Promise<MeetingItemView[]> {
+    const input: QueryInput = {
+      TableName: this.tables.MainTable,
+      IndexName: 'GSI1',
+      KeyConditionExpression: '#GSI1PK = :GSI1PK',
+      ScanIndexForward: true,
+      ExpressionAttributeNames: {
+        '#GSI1PK': 'GSI1PK',
+      },
+      ExpressionAttributeValues: {
+        ':GSI1PK': {
+          S: `${location.value}#${month}#MEETINGS`,
+        },
+      },
+    };
+
+    if (category) {
+      input.KeyConditionExpression += ' AND begins_with(#GSI1SK, :CATEGORY)';
+      input.ExpressionAttributeNames = {
+        ...input.ExpressionAttributeNames,
+        '#GSI1SK': 'GSI1SK',
+      };
+      input.ExpressionAttributeValues = {
+        ...input.ExpressionAttributeValues,
+        ':CATEGORY': {
+          S: category.value,
+        },
+      };
+    }
+
+    let queryResult: QueryOutput;
+    try {
+      queryResult = await this.client.query(input).promise();
+    } catch (error) {
+      throw UnexpectedError.wrap(
+        error,
+        `Failed to list meetings at ${location.value} in ${month}${
+          category ? ` tagged ${category.value}` : ''
+        }`
+      );
+    }
+
+    return queryResult.Items.map((item) => MeetingItemViewMap.dynamoToDomain(item));
   }
 }
