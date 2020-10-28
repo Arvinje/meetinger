@@ -14,7 +14,7 @@ export class MeetingViewMap {
     const [rawCategory, rawStartsAt] = rawMeetinView.GSI1SK.S.split('#');
 
     const meetingView = MeetingView.create({
-      id: rawMeetinView.PK?.S || rawMeetinView.GSI2PK?.S,
+      id: rawMeetinView.PK?.S,
       title: rawMeetinView.Title.S,
       description: rawMeetinView.Description.S,
       category: rawCategory,
