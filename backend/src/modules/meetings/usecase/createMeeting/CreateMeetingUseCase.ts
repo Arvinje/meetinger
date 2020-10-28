@@ -14,6 +14,7 @@ import { User } from '@src/modules/users/domain/User';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
 import { MeetingLocation } from '../../domain/MeetingLocation';
+import { MeetingCategory } from '../../domain/MeetingCategory';
 
 type Response = Result<CreateMeetingResponse, ValidationError | UnexpectedError>;
 
@@ -37,6 +38,9 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
     const descOrError = await MeetingDescription.create(request.description);
     if (descOrError.isErr()) return Err(descOrError.unwrapErr());
 
+    const categoryOrError = await MeetingCategory.create(request.category);
+    if (categoryOrError.isErr()) return Err(categoryOrError.unwrapErr());
+
     const startsAtOrError = moment(request.startsAt);
     if (!startsAtOrError.isValid())
       return Err(ValidationError.create('Meeting start time is not valid'));
@@ -53,6 +57,7 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
       await Meeting.create({
         title: titleOrError.unwrap(),
         description: descOrError.unwrap(),
+        category: categoryOrError.unwrap(),
         startsAt: startsAtOrError.toDate(),
         location: locationOrError.unwrap(),
         createdBy: organizerOrError.unwrap(),

@@ -11,11 +11,14 @@ export class MeetingViewMap {
       AttendeeDetailsMap.dynamoToDomain(rawDetails)
     );
 
+    const [rawCategory, rawStartsAt] = rawMeetinView.GSI1SK.S.split('#');
+
     const meetingView = MeetingView.create({
       id: rawMeetinView.PK?.S || rawMeetinView.GSI2PK?.S,
       title: rawMeetinView.Title.S,
       description: rawMeetinView.Description.S,
-      startsAt: new Date(rawMeetinView.GSI1SK?.S || rawMeetinView.GSI2SK?.S),
+      category: rawCategory,
+      startsAt: new Date(rawStartsAt),
       location: rawMeetinView.GSI1PK.S.split('#')[0],
       createdBy: rawMeetinView.GSI2PK.S.split('#')[0],
       remainingSeats: Number(rawMeetinView.RemainingSeats.N),
@@ -34,6 +37,7 @@ export class MeetingViewMap {
       id: meetingView.id,
       title: meetingView.title,
       description: meetingView.description,
+      category: meetingView.category,
       startsAt: meetingView.startsAt.toISOString(),
       location: meetingView.location,
       remainingSeats: meetingView.remainingSeats,

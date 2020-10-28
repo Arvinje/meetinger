@@ -6,6 +6,7 @@ export interface MeetingViewProps {
   id: string;
   title: string;
   description: string;
+  category: string;
   startsAt: Date;
   location: string;
   remainingSeats: number;
@@ -25,6 +26,10 @@ export class MeetingView extends ValueObject<MeetingViewProps> {
 
   get description(): string {
     return this.props.description;
+  }
+
+  get category(): string {
+    return this.props.category;
   }
 
   get startsAt(): Date {

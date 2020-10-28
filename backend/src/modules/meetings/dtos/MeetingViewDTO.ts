@@ -4,6 +4,7 @@ export interface MeetingViewDTO {
   id: string;
   title: string;
   description: string;
+  category: string;
   startsAt: string;
   location: string;
   remainingSeats: number;
