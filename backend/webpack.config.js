@@ -26,6 +26,9 @@ module.exports = {
     path: path.join(__dirname, '.webpack'),
     filename: '[name].js',
   },
+  optimization: {
+    concatenateModules: false, // Fix for webpack 5 & serverless-webpack incompatibility
+  },
   target: 'node',
   externals: [nodeExternals()],
   module: {
