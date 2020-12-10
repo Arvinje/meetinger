@@ -1,8 +1,8 @@
 import moment from 'moment';
 import { Err, Ok, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
-import { UserRepo } from '@src/modules/users/repos/UserRepo';
-import { UserName } from '@src/modules/users/domain/UserName';
+import { UserRepo } from '@users/repos/UserRepo';
+import { UserName } from '@users/domain/UserName';
 import { MeetingRepo } from '@meetings/repos/MeetingRepo';
 import { MeetingTitle } from '@meetings/domain/MeetingTitle';
 import { MeetingDescription } from '@meetings/domain/MeetingDescription';
@@ -10,11 +10,12 @@ import { Meeting } from '@meetings/domain/Meeting';
 import { Attendee } from '@meetings/domain/Attendee';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
-import { User } from '@src/modules/users/domain/User';
-import { CreateMeetingRequest } from './CreateMeetingRequest';
+import { User } from '@users/domain/User';
+import { MeetingLocation } from '@meetings/domain/MeetingLocation';
+import { MeetingCategory } from '@meetings/domain/MeetingCategory';
+import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
-import { MeetingLocation } from '../../domain/MeetingLocation';
-import { MeetingCategory } from '../../domain/MeetingCategory';
+import { CreateMeetingRequest } from './CreateMeetingRequest';
 
 type Response = Result<CreateMeetingResponse, ValidationError | UnexpectedError>;
 
@@ -23,9 +24,12 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
 
   private userRepo: UserRepo;
 
-  constructor(userRepo: UserRepo, meetingRepo: MeetingRepo) {
+  private attendeeRepo: AttendeeRepo;
+
+  constructor(userRepo: UserRepo, meetingRepo: MeetingRepo, attendeeRepo: AttendeeRepo) {
     this.userRepo = userRepo;
     this.meetingRepo = meetingRepo;
+    this.attendeeRepo = attendeeRepo;
   }
 
   async execute(request: CreateMeetingRequest): Promise<Response> {
@@ -67,7 +71,10 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
 
     let organizer: User;
     try {
-      organizer = await this.userRepo.findByUserName(organizerOrError.unwrap());
+      [organizer] = await Promise.all<User, void>([
+        this.userRepo.findByUserName(organizerOrError.unwrap()),
+        this.meetingRepo.save(meeting),
+      ]);
     } catch (error) {
       return Err(UnexpectedError.wrap(error));
     }
@@ -77,13 +84,13 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
       fullName: organizer.fullName,
       meetingID: meeting.id,
       joinedMeetingOn: new Date(),
+      meetingStartsAt: meeting.startsAt,
+      meetingTitle: meeting.title,
       isOrganizer: true,
     }).unwrap();
 
-    meeting.addAttendee(organizerAsAttendee);
-
     try {
-      await this.meetingRepo.create(meeting);
+      await this.attendeeRepo.save(organizerAsAttendee);
       return Ok<CreateMeetingResponse>({
         id: meeting.id.id.toString(),
       });

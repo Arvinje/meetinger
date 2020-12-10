@@ -1,6 +1,6 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { CreateMeetingRequest } from '@meetings/usecase/createMeeting/CreateMeetingRequest';
-import { CreateMeetingUseCase } from '@src/modules/meetings/usecase/createMeeting/CreateMeetingUseCase';
+import { CreateMeetingUseCase } from '@meetings/usecase/createMeeting/CreateMeetingUseCase';
 import { BaseController } from '@src/shared/infra/http/BaseController';
 import { APIGatewayWithAuthorizerEvent } from '@src/shared/infra/http/types';
 import { ValidationError } from '@src/shared/core/AppError';

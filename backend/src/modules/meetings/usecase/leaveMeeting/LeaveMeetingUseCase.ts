@@ -1,6 +1,6 @@
 import { Err, Ok, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
-import { UserName } from '@src/modules/users/domain/UserName';
+import { UserName } from '@users/domain/UserName';
 import { MeetingRepo } from '@meetings/repos/MeetingRepo';
 import { Meeting } from '@meetings/domain/Meeting';
 import { Attendee } from '@meetings/domain/Attendee';
@@ -10,6 +10,7 @@ import { MeetingID } from '@meetings/domain/MeetingID';
 import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
 import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
 import { AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
+import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
 import { LeaveMeetingRequest } from './LeaveMeetingRequest';
 import { OrganizerCannotLeaveError } from './LeaveMeetingErrors';
 
@@ -40,8 +41,12 @@ export class LeaveMeetingUseCase implements UseCase<LeaveMeetingRequest, Promise
 
     let attendee: Attendee;
     let meeting: Meeting;
+    let meetingVersion: number;
     try {
-      [attendee, meeting] = await Promise.all<Attendee, Meeting>([
+      [[attendee], [meeting, meetingVersion]] = await Promise.all<
+        [Attendee, number],
+        [Meeting, number]
+      >([
         this.attendeeRepo.fetch(userNameOrError.unwrap(), meetingID),
         this.meetingRepo.fetchMeetingByID(meetingID),
       ]);
@@ -58,10 +63,22 @@ export class LeaveMeetingUseCase implements UseCase<LeaveMeetingRequest, Promise
 
     if (attendee.isOrganizer) return Err(OrganizerCannotLeaveError.create());
 
-    meeting.removeAttendee(attendee);
+    const remainingSeatsOrError = await MeetingRemainingSeats.create(
+      meeting.remainingSeats.value + 1
+    );
+    if (remainingSeatsOrError.isErr()) return Err(remainingSeatsOrError.unwrapErr());
+
+    const remainingSeatsUpdated = meeting.updateRemainingSeats(remainingSeatsOrError.unwrap());
+    if (remainingSeatsUpdated.isErr()) return Err(remainingSeatsUpdated.unwrapErr());
 
     try {
-      return Ok(await this.meetingRepo.updateAttendees(meeting));
+      await this.meetingRepo.save(meeting, meetingVersion);
+    } catch (error) {
+      return Err(UnexpectedError.wrap(error));
+    }
+
+    try {
+      return Ok(await this.attendeeRepo.remove(attendee.username, meetingID));
     } catch (error) {
       return Err(UnexpectedError.wrap(error));
     }

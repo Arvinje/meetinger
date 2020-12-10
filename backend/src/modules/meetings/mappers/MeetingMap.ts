@@ -1,14 +1,14 @@
 import moment from 'moment';
 import { AttributeMap, PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb';
 import { Meeting } from '@meetings/domain/Meeting';
-import { UserName } from '@src/modules/users/domain/UserName';
 import { UniqueID } from '@src/shared/domain/uniqueId';
+import { UserName } from '@users/domain/UserName';
 import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
 import { MeetingDescription } from '@meetings/domain/MeetingDescription';
-import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
 import { MeetingTitle } from '@meetings/domain/MeetingTitle';
-import { MeetingLocation } from '../domain/MeetingLocation';
-import { MeetingCategory } from '../domain/MeetingCategory';
+import { MeetingLocation } from '@meetings/domain/MeetingLocation';
+import { MeetingCategory } from '@meetings/domain/MeetingCategory';
+import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
 
 export class MeetingMap {
   public static async dynamoToDomain(raw: AttributeMap): Promise<Meeting> {
@@ -46,7 +46,7 @@ export class MeetingMap {
     return meeting.unwrap();
   }
 
-  public static toDynamoFull(meeting: Meeting): PutItemInputAttributeMap {
+  public static toDynamoFull(meeting: Meeting, version: number): PutItemInputAttributeMap {
     const startsAt = moment(meeting.startsAt);
     return {
       PK: { S: meeting.id.id.toString() },
@@ -59,6 +59,7 @@ export class MeetingMap {
       Description: { S: meeting.description.value },
       RemainingSeats: { N: meeting.remainingSeats.value.toString() },
       AvailableSeats: { N: meeting.availableSeats.value.toString() },
+      Version: { N: version.toString() },
     };
   }
 }

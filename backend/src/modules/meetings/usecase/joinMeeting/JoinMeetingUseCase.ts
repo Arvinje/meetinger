@@ -1,19 +1,23 @@
 import { Err, Ok, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
-import { UserRepo } from '@src/modules/users/repos/UserRepo';
-import { UserName } from '@src/modules/users/domain/UserName';
+import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
+import { UniqueID } from '@src/shared/domain/uniqueId';
+import { UserRepo } from '@users/repos/UserRepo';
+import { UserName } from '@users/domain/UserName';
 import { MeetingRepo } from '@meetings/repos/MeetingRepo';
 import { Meeting } from '@meetings/domain/Meeting';
 import { Attendee } from '@meetings/domain/Attendee';
-import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
-import { UniqueID } from '@src/shared/domain/uniqueId';
-import { User } from '@src/modules/users/domain/User';
+import { User } from '@users/domain/User';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
-import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
+import { MeetingNotFoundError, MeetingFullyBooked } from '@meetings/errors/MeetingErrors';
+import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
 import { JoinMeetingRequest } from './JoinMeetingRequest';
 
-type Response = Result<void, MeetingNotFoundError | ValidationError | UnexpectedError>;
+type Response = Result<
+  void,
+  MeetingNotFoundError | MeetingFullyBooked | ValidationError | UnexpectedError
+>;
 
 export class JoinMeetingUseCase implements UseCase<JoinMeetingRequest, Promise<Response>> {
   private meetingRepo: MeetingRepo;
@@ -45,8 +49,9 @@ export class JoinMeetingUseCase implements UseCase<JoinMeetingRequest, Promise<R
     }
 
     let meeting: Meeting;
+    let meetingVersion: number;
     try {
-      meeting = await this.meetingRepo.fetchMeetingByID(meetingID);
+      [meeting, meetingVersion] = await this.meetingRepo.fetchMeetingByID(meetingID);
     } catch (error) {
       if (error instanceof MeetingNotFoundError) return Err(error);
       return Err(UnexpectedError.wrap(error));
@@ -64,12 +69,26 @@ export class JoinMeetingUseCase implements UseCase<JoinMeetingRequest, Promise<R
       fullName: user.fullName,
       meetingID: meeting.id,
       joinedMeetingOn: new Date(),
+      meetingStartsAt: meeting.startsAt,
+      meetingTitle: meeting.title,
     }).unwrap();
 
-    meeting.addAttendee(attendee);
+    const remainingSeatsOrError = await MeetingRemainingSeats.create(
+      meeting.remainingSeats.value - 1
+    );
+    if (remainingSeatsOrError.isErr()) return Err(MeetingFullyBooked.create());
+
+    const remainingSeatsUpdated = meeting.updateRemainingSeats(remainingSeatsOrError.unwrap());
+    if (remainingSeatsUpdated.isErr()) return Err(remainingSeatsUpdated.unwrapErr());
 
     try {
-      return Ok(await this.meetingRepo.updateAttendees(meeting));
+      await this.meetingRepo.save(meeting, meetingVersion);
+    } catch (error) {
+      return Err(UnexpectedError.wrap(error));
+    }
+
+    try {
+      return Ok(await this.attendeeRepo.save(attendee));
     } catch (error) {
       return Err(UnexpectedError.wrap(error));
     }

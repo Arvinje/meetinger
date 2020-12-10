@@ -1,15 +1,18 @@
+import { Result, Ok } from '@hqoss/monads';
 import { Entity } from '@src/shared/domain/entity';
+import { UniqueID } from '@src/shared/domain/uniqueId';
 import { UserName } from '@users/domain/UserName';
 import { UserFullName } from '@users/domain/UserFullName';
-import { UniqueID } from '@src/shared/domain/uniqueId';
-import { Result, Ok } from '@hqoss/monads';
 import { MeetingID } from './MeetingID';
+import { MeetingTitle } from './MeetingTitle';
 
 export interface AttendeeProps {
   username: UserName;
   fullName: UserFullName;
   meetingID: MeetingID;
-  joinedMeetingOn?: Date;
+  joinedMeetingOn: Date;
+  meetingStartsAt: Date;
+  meetingTitle: MeetingTitle;
   isOrganizer?: boolean;
 }
 
@@ -28,6 +31,14 @@ export class Attendee extends Entity<AttendeeProps> {
 
   get joinedMeetingOn(): Date {
     return this.props.joinedMeetingOn;
+  }
+
+  get meetingStartsAt(): Date {
+    return this.props.meetingStartsAt;
+  }
+
+  get meetingTitle(): MeetingTitle {
+    return this.props.meetingTitle;
   }
 
   get isOrganizer(): boolean {

@@ -1,16 +1,15 @@
 import { Entity } from '@src/shared/domain/entity';
 import { UniqueID } from '@src/shared/domain/uniqueId';
-import { Result, Ok } from '@hqoss/monads';
-import { UserName } from '@src/modules/users/domain/UserName';
+import { Result, Ok, Err } from '@hqoss/monads';
+import { UserName } from '@users/domain/UserName';
 import { MeetingID } from './MeetingID';
 import { MeetingTitle } from './MeetingTitle';
 import { MeetingDescription } from './MeetingDescription';
-import { Attendee } from './Attendee';
-import { Attendees } from './Attendees';
 import { MeetingRemainingSeats } from './MeetingRemainingSeats';
 import { MeetingAvailableSeats } from './MeetingAvailableSeats';
 import { MeetingLocation } from './MeetingLocation';
 import { MeetingCategory } from './MeetingCategory';
+import { MeetingFullyBooked } from '../errors/MeetingErrors';
 
 export interface MeetingProps {
   title: MeetingTitle;
@@ -18,7 +17,6 @@ export interface MeetingProps {
   category: MeetingCategory;
   startsAt: Date;
   location: MeetingLocation;
-  attendees?: Attendees;
   remainingSeats?: MeetingRemainingSeats;
   availableSeats: MeetingAvailableSeats;
   createdBy: UserName;
@@ -51,10 +49,6 @@ export class Meeting extends Entity<MeetingProps> {
     return this.props.location;
   }
 
-  get attendees(): Attendees {
-    return this.props.attendees;
-  }
-
   get remainingSeats(): MeetingRemainingSeats {
     return this.props.remainingSeats;
   }
@@ -79,21 +73,18 @@ export class Meeting extends Entity<MeetingProps> {
   public static async create(props: MeetingProps, id?: UniqueID): Promise<Result<Meeting, void>> {
     const defaultProps: MeetingProps = {
       ...props,
-      attendees: props.attendees || Attendees.create(),
       createdAt: props.createdAt || new Date(),
       remainingSeats:
         props.remainingSeats ||
-        (await MeetingRemainingSeats.create(props.availableSeats.value)).unwrap(),
+        (await MeetingRemainingSeats.create(props.availableSeats.value - 1)).unwrap(),
     };
     const meeting = new Meeting(defaultProps, id);
     return Ok(meeting);
   }
 
-  public addAttendee(attendee: Attendee): void {
-    this.props.attendees.add(attendee);
-  }
-
-  public removeAttendee(attendee: Attendee): void {
-    this.props.attendees.remove(attendee);
+  public updateRemainingSeats(rs: MeetingRemainingSeats): Result<void, MeetingFullyBooked> {
+    if (rs.value > this.availableSeats.value) return Err(MeetingFullyBooked.create());
+    this.props.remainingSeats = rs;
+    return Ok(undefined);
   }
 }

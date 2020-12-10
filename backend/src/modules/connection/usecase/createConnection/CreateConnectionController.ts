@@ -1,7 +1,7 @@
 import 'source-map-support/register';
 import { APIGatewayProxyResult, APIGatewayProxyEvent } from 'aws-lambda';
-import { CreateConnectionUseCase } from '@src/modules/connection/usecase/createConnection/CreateConnectionUseCase';
-import { CreateConnectionRequest } from '@src/modules/connection/usecase/createConnection/CreateConnectionRequest';
+import { CreateConnectionUseCase } from '@connection/usecase/createConnection/CreateConnectionUseCase';
+import { CreateConnectionRequest } from '@connection/usecase/createConnection/CreateConnectionRequest';
 import { BaseController } from '@src/shared/infra/http/BaseController';
 import { BaseErrorResponse } from '@src/shared/core/BaseError';
 

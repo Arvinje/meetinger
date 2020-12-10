@@ -5,11 +5,7 @@ import { AttendeeDetailsMap } from './AttendeeDetailsMap';
 
 export class MeetingViewMap {
   public static dynamoToDomain(rawItems: AttributeMap[]): MeetingView {
-    const [rawMeetinView, ...rawAttendeesDetails] = rawItems;
-
-    const attendeesDetails = rawAttendeesDetails.map((rawDetails) =>
-      AttendeeDetailsMap.dynamoToDomain(rawDetails)
-    );
+    const [rawMeetinView] = rawItems;
 
     const [rawCategory, rawStartsAt] = rawMeetinView.GSI1SK.S.split('#');
 
@@ -23,7 +19,6 @@ export class MeetingViewMap {
       createdBy: rawMeetinView.GSI2PK.S.split('#')[0],
       remainingSeats: Number(rawMeetinView.RemainingSeats.N),
       availableSeats: Number(rawMeetinView.AvailableSeats.N),
-      attendees: attendeesDetails,
     });
 
     return meetingView.unwrap();

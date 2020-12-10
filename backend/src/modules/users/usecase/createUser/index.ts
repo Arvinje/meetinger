@@ -1,8 +1,8 @@
 import 'source-map-support/register';
 import { CognitoUserPoolTriggerHandler } from 'aws-lambda';
 import DDBConfig from '@src/shared/infra/dynamodb/dynamodb';
-import { DynamoDBUserRepo } from '@src/modules/users/repos/implementations/DynamoDBUserRepo';
-import { CreateUserUseCase } from '@src/modules/users/usecase/createUser/CreateUserUseCase';
+import { DynamoDBUserRepo } from '@users/repos/implementations/DynamoDBUserRepo';
+import { CreateUserUseCase } from '@users/usecase/createUser/CreateUserUseCase';
 import { CreateUserController } from './CreateUserController';
 
 const userRepo = new DynamoDBUserRepo(DDBConfig);

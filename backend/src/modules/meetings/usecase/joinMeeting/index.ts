@@ -1,7 +1,7 @@
 import 'source-map-support/register';
 import DDBConfig from '@src/shared/infra/dynamodb/dynamodb';
 import { DynamoDBUserRepo } from '@users/repos/implementations/DynamoDBUserRepo';
-import { DynamoDBMeetingRepo } from '@src/modules/meetings/repos/implementations/DynamoDBMeetingRepo';
+import { DynamoDBMeetingRepo } from '@meetings/repos/implementations/DynamoDBMeetingRepo';
 import { APIGatewayWithAuthorizerHandler } from '@src/shared/infra/http/types';
 import { DynamoDBAttendeeRepo } from '@meetings/repos/implementations/DynamoDBAttendeeRepo';
 import { JoinMeetingUseCase } from './JoinMeetingUseCase';

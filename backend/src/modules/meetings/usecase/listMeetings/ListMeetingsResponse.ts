@@ -1,4 +1,4 @@
-import { MeetingItemViewDTO } from '../../dtos/MeetingItemViewDTO';
+import { MeetingItemViewDTO } from '@meetings/dtos/MeetingItemViewDTO';
 
 export interface ListMeetingsResponse {
   meetings: MeetingItemViewDTO[];

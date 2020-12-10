@@ -1,6 +1,6 @@
 import { Err, Ok, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
-import { UserName } from '@src/modules/users/domain/UserName';
+import { UserName } from '@users/domain/UserName';
 import { Attendee } from '@meetings/domain/Attendee';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { UniqueID } from '@src/shared/domain/uniqueId';
@@ -30,7 +30,7 @@ export class GetAttendanceUseCase implements UseCase<GetAttendanceRequest, Promi
 
     let attendee: Attendee;
     try {
-      attendee = await this.attendeeRepo.fetch(userNameOrError.unwrap(), meetingID);
+      [attendee] = await this.attendeeRepo.fetch(userNameOrError.unwrap(), meetingID);
     } catch (error) {
       switch (error.type) {
         case AttendeeNotFoundError.type:
