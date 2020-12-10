@@ -1,5 +1,5 @@
 {
-  "name": "minute",
+  "name": "meetinger",
   "version": "0.1.0",
   "scripts": {
     "test": "NODE_ENV=test ./node_modules/.bin/jest --ci --verbose",
@@ -63,5 +63,5 @@
     "webpack-node-externals": "^1.7.2"
   },
   "author": "Arvin Jenabi",
-  "license": "UNLICENSED"
+  "license": "MIT"
 }
