@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { AttributeMap, PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb';
 import { Meeting } from '@meetings/domain/Meeting';
 import { UniqueID } from '@src/shared/domain/uniqueId';
@@ -47,7 +47,7 @@ export class MeetingMap {
   }
 
   public static toDynamoFull(meeting: Meeting, version: number): PutItemInputAttributeMap {
-    const startsAt = moment(meeting.startsAt);
+    const startsAt = dayjs(meeting.startsAt);
     return {
       PK: { S: meeting.id.id.toString() },
       SK: { S: 'META' },

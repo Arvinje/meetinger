@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Err, Ok, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
 import { UserRepo } from '@users/repos/UserRepo';
@@ -45,9 +45,8 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
     const categoryOrError = await MeetingCategory.create(request.category);
     if (categoryOrError.isErr()) return Err(categoryOrError.unwrapErr());
 
-    const startsAtOrError = moment(request.startsAt);
-    if (!startsAtOrError.isValid())
-      return Err(ValidationError.create('Meeting start time is not valid'));
+    const startsAt = dayjs(request.startsAt);
+    if (!startsAt.isValid()) return Err(ValidationError.create('Meeting start time is not valid'));
 
     const locationOrError = await MeetingLocation.create(request.location);
     if (locationOrError.isErr()) return Err(locationOrError.unwrapErr());
@@ -62,7 +61,7 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
         title: titleOrError.unwrap(),
         description: descOrError.unwrap(),
         category: categoryOrError.unwrap(),
-        startsAt: startsAtOrError.toDate(),
+        startsAt: startsAt.toDate(),
         location: locationOrError.unwrap(),
         createdBy: organizerOrError.unwrap(),
         availableSeats: availableSeatsOrError.unwrap(),

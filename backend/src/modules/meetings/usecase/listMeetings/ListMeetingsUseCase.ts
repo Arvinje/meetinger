@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Err, Ok, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
 import {
@@ -35,10 +35,10 @@ export class ListMeetingsUseCase implements UseCase<ListMeetingsRequest, Promise
     let month: string;
     if (request.month) {
       month = request.month.trim();
-      if (!moment(month, 'YYYY-MM', true).isValid())
+      if (!dayjs(month, 'YYYY-MM', true).isValid())
         return Err(ValidationError.create('month is not valid'));
     } else {
-      month = moment().format('YYYY-MM');
+      month = dayjs().format('YYYY-MM');
     }
 
     let meetingItemViews: MeetingItemView[];
