@@ -1,7 +1,5 @@
 service: meetinger
 
-frameworkVersion: "=1.74.1"
-
 package:
   individually: true
   exclude:
@@ -39,6 +37,9 @@ provider:
   runtime: nodejs12.x
   region: ${opt:region, 'eu-central-1'}
   stage: ${opt:stage, 'dev'}
+
+  apiGateway:
+    shouldStartNameWithService: true
 
   logs:
     websocket:
