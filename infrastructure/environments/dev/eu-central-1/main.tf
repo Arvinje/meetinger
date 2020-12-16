@@ -15,3 +15,10 @@ module "main_dynamodb_table" {
   PROJECT_NAME  = var.project_name
   ENVIRONMENT   = var.dev_stage
 }
+
+module "sns_topics" {
+  source = "../../../modules/sns"
+  
+  PROJECT_NAME  = var.project_name
+  ENVIRONMENT   = var.dev_stage
+}
