@@ -2,10 +2,10 @@ import { APIGatewayProxyResult } from 'aws-lambda';
 import { GetMeetingRequest } from '@meetings/usecase/getMeeting/GetMeetingRequest';
 import { BaseController } from '@src/shared/infra/http/BaseController';
 import { APIGatewayWithAuthorizerEvent } from '@src/shared/infra/http/types';
-import { ValidationError } from '@src/shared/core/AppError';
+import { AppErrors, UnexpectedError } from '@src/shared/core/AppError';
 import { BaseErrorResponse } from '@src/shared/core/BaseError';
 import { MeetingViewDTO } from '@meetings/dtos/MeetingViewDTO';
-import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
+import { MeetingErrors } from '@meetings/errors/MeetingErrors';
 import { GetMeetingUseCase } from './GetMeetingUseCase';
 
 export class GetMeetingController extends BaseController {
@@ -25,14 +25,16 @@ export class GetMeetingController extends BaseController {
     if (result.isErr()) {
       const error = result.unwrapErr();
       switch (error.type) {
-        case ValidationError.type:
-          return this.unprocessableEntity<BaseErrorResponse>((error as ValidationError).toResponse);
+        case AppErrors.UnexpectedError:
+          return this.internalError<BaseErrorResponse>(error.toResponse);
 
-        case MeetingNotFoundError.type:
-          return this.notFound<BaseErrorResponse>((error as MeetingNotFoundError).toResponse);
+        case MeetingErrors.MeetingNotFoundError:
+          return this.notFound<BaseErrorResponse>(error.toResponse);
 
         default:
-          return this.internalError<BaseErrorResponse>(error.toResponse);
+          return this.internalError<BaseErrorResponse>(
+            UnexpectedError.wrap(error, 'unknown error detected').toResponse
+          );
       }
     }
 

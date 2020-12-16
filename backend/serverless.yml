@@ -114,6 +114,17 @@ functions:
     handler: src/modules/meetings/usecase/createMeeting/index.handler
     environment:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
+      EVENT_MEETING_CREATED_ARN: ${ssm:/sns/${self:service}/${self:provider.stage}/MeetingCreated_arn~true}
+      EVENT_ATTENDEE_JOINED_ARN: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeJoined_arn~true}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sns:Publish
+        Resource: ${ssm:/sns/${self:service}/${self:provider.stage}/MeetingCreated_arn~true}
+      - Effect: Allow
+        Action:
+          - sns:Publish
+        Resource: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeJoined_arn~true}
     events:
       - http:
           path: meetings
@@ -124,6 +135,12 @@ functions:
     handler: src/modules/meetings/usecase/joinMeeting/index.handler
     environment:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
+      EVENT_ATTENDEE_JOINED_ARN: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeJoined_arn~true}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sns:Publish
+        Resource: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeJoined_arn~true}
     events:
       - http:
           path: meetings/{id}/attendance
@@ -134,6 +151,12 @@ functions:
     handler: src/modules/meetings/usecase/leaveMeeting/index.handler
     environment:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
+      EVENT_ATTENDEE_LEFT_ARN: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeLeft_arn~true}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sns:Publish
+        Resource: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeLeft_arn~true}
     events:
       - http:
           path: meetings/{id}/attendance
@@ -169,3 +192,17 @@ functions:
           path: meetings/{id}/attendance
           method: get
           authorizer: *authorizer
+
+  PersistAttendee:
+    handler: src/modules/meetings/usecase/persistAttendee/index.handler
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}
+    events:
+      - sns: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeJoined_arn~true}
+  
+  RemoveAttendee:
+    handler: src/modules/meetings/usecase/removeAttendee/index.handler
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}
+    events:
+      - sns: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeLeft_arn~true}

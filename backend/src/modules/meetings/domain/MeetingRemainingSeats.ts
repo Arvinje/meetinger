@@ -36,4 +36,12 @@ export class MeetingRemainingSeats extends ValueObject<MeetingRemainingSeatsProp
       );
     }
   }
+
+  public async add(count: number): Promise<Response> {
+    return MeetingRemainingSeats.create(this.props.remainingSeats + count);
+  }
+
+  public async subtract(count: number): Promise<Response> {
+    return MeetingRemainingSeats.create(this.props.remainingSeats - count);
+  }
 }

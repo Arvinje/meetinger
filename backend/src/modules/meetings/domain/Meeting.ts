@@ -1,7 +1,9 @@
-import { Entity } from '@src/shared/domain/entity';
 import { UniqueID } from '@src/shared/domain/uniqueId';
 import { Result, Ok, Err } from '@hqoss/monads';
 import { UserName } from '@users/domain/UserName';
+import { AggregateRoot } from '@src/shared/domain/AggregateRoot';
+import { MeetingFullyBooked } from '@meetings/errors/MeetingErrors';
+import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { MeetingID } from './MeetingID';
 import { MeetingTitle } from './MeetingTitle';
 import { MeetingDescription } from './MeetingDescription';
@@ -9,7 +11,9 @@ import { MeetingRemainingSeats } from './MeetingRemainingSeats';
 import { MeetingAvailableSeats } from './MeetingAvailableSeats';
 import { MeetingLocation } from './MeetingLocation';
 import { MeetingCategory } from './MeetingCategory';
-import { MeetingFullyBooked } from '../errors/MeetingErrors';
+import { MeetingCreated } from './events/MeetingCreated';
+import { AttendeeJoined } from './events/AttendeeJoined';
+import { AttendeeLeft } from './events/AttendeeLeft';
 
 export interface MeetingProps {
   title: MeetingTitle;
@@ -23,7 +27,7 @@ export interface MeetingProps {
   createdAt?: Date;
 }
 
-export class Meeting extends Entity<MeetingProps> {
+export class Meeting extends AggregateRoot<MeetingProps> {
   get id(): MeetingID {
     // eslint-disable-next-line no-underscore-dangle
     return MeetingID.create(this._id);
@@ -79,12 +83,40 @@ export class Meeting extends Entity<MeetingProps> {
         (await MeetingRemainingSeats.create(props.availableSeats.value - 1)).unwrap(),
     };
     const meeting = new Meeting(defaultProps, id);
+
+    const isNewMeeting = !!id === false;
+    if (isNewMeeting) {
+      meeting.registerEvent(new MeetingCreated(meeting));
+      meeting.registerEvent(new AttendeeJoined(meeting, defaultProps.createdBy, true));
+    }
+
     return Ok(meeting);
   }
 
-  public updateRemainingSeats(rs: MeetingRemainingSeats): Result<void, MeetingFullyBooked> {
-    if (rs.value > this.availableSeats.value) return Err(MeetingFullyBooked.create());
-    this.props.remainingSeats = rs;
+  public async addAttendee(
+    username: UserName
+  ): Promise<Result<void, MeetingFullyBooked | ValidationError | UnexpectedError>> {
+    if (this.remainingSeats.value === 0) return Err(MeetingFullyBooked.create());
+
+    const remainingOrError = await this.props.remainingSeats.subtract(1);
+    if (remainingOrError.isErr()) return Err(remainingOrError.unwrapErr());
+    this.props.remainingSeats = remainingOrError.unwrap();
+
+    this.registerEvent(new AttendeeJoined(this, username, false));
+    return Ok(undefined);
+  }
+
+  public async removeAttendee(
+    username: UserName
+  ): Promise<Result<void, ValidationError | UnexpectedError>> {
+    if (this.remainingSeats.value === this.availableSeats.value)
+      return Err(ValidationError.create('cannot remove a non-existing attendee'));
+
+    const remainingOrError = await this.props.remainingSeats.add(1);
+    if (remainingOrError.isErr()) return Err(remainingOrError.unwrapErr());
+    this.props.remainingSeats = remainingOrError.unwrap();
+
+    this.registerEvent(new AttendeeLeft(this, username));
     return Ok(undefined);
   }
 }

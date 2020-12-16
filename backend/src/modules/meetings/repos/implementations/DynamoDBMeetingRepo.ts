@@ -15,6 +15,7 @@ import { MeetingItemView } from '@meetings/domain/MeetingItemView';
 import { MeetingCategory } from '@meetings/domain/MeetingCategory';
 import { MeetingLocation } from '@meetings/domain/MeetingLocation';
 import { MeetingItemViewMap } from '@meetings/mappers/MeetingItemViewMap';
+import { EventPublisher } from '@src/shared/domain/EventPublisher';
 import { MeetingRepo } from '../MeetingRepo';
 
 export class DynamoDBMeetingRepo implements MeetingRepo {
@@ -43,6 +44,7 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
 
     try {
       await this.client.putItem(item).promise();
+      await EventPublisher.dispatchAggregateEvents(meeting);
     } catch (error) {
       throw UnexpectedError.wrap(
         error,

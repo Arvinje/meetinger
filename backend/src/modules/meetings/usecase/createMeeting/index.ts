@@ -1,16 +1,28 @@
+/* eslint-disable no-new */
 import 'source-map-support/register';
 import DDBConfig from '@src/shared/infra/dynamodb/dynamodb';
-import { DynamoDBUserRepo } from '@users/repos/implementations/DynamoDBUserRepo';
 import { DynamoDBMeetingRepo } from '@meetings/repos/implementations/DynamoDBMeetingRepo';
 import { APIGatewayWithAuthorizerHandler } from '@src/shared/infra/http/types';
-import { DynamoDBAttendeeRepo } from '@meetings/repos/implementations/DynamoDBAttendeeRepo';
+import { OnMeetingCreated } from '@meetings/listeners/OnMeetingCreated';
+import { OnAttendeeJoined } from '@meetings/listeners/OnAttendeeJoined';
+import { SNSBroker, SNSConfig } from '@src/shared/infra/brokers/SNSBroker';
 import { CreateMeetingUseCase } from './CreateMeetingUseCase';
 import { CreateMeetingController } from './CreateMeetingController';
 
-const userRepo = new DynamoDBUserRepo(DDBConfig);
+// Infra
+const broker = new SNSBroker(SNSConfig);
+
+// Repositories
 const meetingRepo = new DynamoDBMeetingRepo(DDBConfig);
-const attendeeRepo = new DynamoDBAttendeeRepo(DDBConfig);
-const createMeetingUseCase = new CreateMeetingUseCase(userRepo, meetingRepo, attendeeRepo);
+
+// Use Cases
+const createMeetingUseCase = new CreateMeetingUseCase(meetingRepo);
+
+// Subscriptions
+new OnMeetingCreated(broker).subscribe();
+new OnAttendeeJoined(broker).subscribe();
+
+// Controller
 const controller = new CreateMeetingController(createMeetingUseCase);
 
 export const handler: APIGatewayWithAuthorizerHandler = async (event) => controller.execute(event);

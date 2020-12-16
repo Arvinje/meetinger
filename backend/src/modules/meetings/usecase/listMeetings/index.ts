@@ -5,8 +5,13 @@ import { DynamoDBMeetingRepo } from '@meetings/repos/implementations/DynamoDBMee
 import { ListMeetingsUseCase } from './ListMeetingsUseCase';
 import { ListMeetingsController } from './GetMeetingController';
 
+// Repositories
 const meetingRepo = new DynamoDBMeetingRepo(DDBConfig);
+
+// Use Cases
 const usecase = new ListMeetingsUseCase(meetingRepo);
+
+// Controller
 const controller = new ListMeetingsController(usecase);
 
 export const handler: APIGatewayWithAuthorizerHandler = async (event) => controller.execute(event);

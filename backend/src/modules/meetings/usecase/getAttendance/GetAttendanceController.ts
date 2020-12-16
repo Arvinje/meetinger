@@ -1,9 +1,9 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { BaseController } from '@src/shared/infra/http/BaseController';
 import { APIGatewayWithAuthorizerEvent } from '@src/shared/infra/http/types';
-import { ValidationError } from '@src/shared/core/AppError';
+import { AppErrors, UnexpectedError } from '@src/shared/core/AppError';
 import { BaseErrorResponse } from '@src/shared/core/BaseError';
-import { AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
+import { AttendeeErrors } from '@meetings/errors/AttendeeErrors';
 import { GetAttendanceUseCase } from './GetAttendanceUseCase';
 import { GetAttendanceResponse } from './GetAttendanceResponse';
 import { GetAttendanceRequest } from './GetAttendanceRequest';
@@ -26,14 +26,19 @@ export class GetAttendanceController extends BaseController {
     if (result.isErr()) {
       const error = result.unwrapErr();
       switch (error.type) {
-        case ValidationError.type:
-          return this.unprocessableEntity<BaseErrorResponse>((error as ValidationError).toResponse);
+        case AppErrors.UnexpectedError:
+          return this.internalError<BaseErrorResponse>(error.toResponse);
 
-        case AttendeeNotFoundError.type:
-          return this.notFound<BaseErrorResponse>((error as AttendeeNotFoundError).toResponse);
+        case AppErrors.ValidationError:
+          return this.unprocessableEntity<BaseErrorResponse>(error.toResponse);
+
+        case AttendeeErrors.AttendeeNotFoundError:
+          return this.notFound<BaseErrorResponse>(error.toResponse);
 
         default:
-          return this.internalError<BaseErrorResponse>(error.toResponse);
+          return this.internalError<BaseErrorResponse>(
+            UnexpectedError.wrap(error, 'unknown error detected').toResponse
+          );
       }
     }
 

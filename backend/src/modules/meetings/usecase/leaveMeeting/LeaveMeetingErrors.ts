@@ -1,21 +1,25 @@
 import { BaseError } from '@src/shared/core/BaseError';
 
-enum LeaveMeetingErrors {
+export enum LeaveMeetingErrors {
   OrganizerCannotLeaveError = 'OrganizerCannotLeaveError',
 }
 
 export class OrganizerCannotLeaveError extends BaseError {
-  public static readonly type: string = LeaveMeetingErrors.OrganizerCannotLeaveError;
+  type: LeaveMeetingErrors.OrganizerCannotLeaveError;
 
   public static create(message?: string): OrganizerCannotLeaveError {
     return new OrganizerCannotLeaveError(
-      this.type,
+      LeaveMeetingErrors.OrganizerCannotLeaveError,
       null,
       message || 'The meeting organizer cannot leave the meeting'
     );
   }
 
   public static wrap(error: unknown, message?: string): OrganizerCannotLeaveError {
-    return new OrganizerCannotLeaveError(this.type, error, message);
+    return new OrganizerCannotLeaveError(
+      LeaveMeetingErrors.OrganizerCannotLeaveError,
+      error,
+      message
+    );
   }
 }

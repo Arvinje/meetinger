@@ -2,9 +2,9 @@ import { APIGatewayProxyResult } from 'aws-lambda';
 import { JoinMeetingRequest } from '@meetings/usecase/joinMeeting/JoinMeetingRequest';
 import { BaseController } from '@src/shared/infra/http/BaseController';
 import { APIGatewayWithAuthorizerEvent } from '@src/shared/infra/http/types';
-import { ValidationError } from '@src/shared/core/AppError';
+import { AppErrors, UnexpectedError } from '@src/shared/core/AppError';
 import { BaseErrorResponse } from '@src/shared/core/BaseError';
-import { MeetingNotFoundError, MeetingFullyBooked } from '@meetings/errors/MeetingErrors';
+import { MeetingErrors } from '@meetings/errors/MeetingErrors';
 import { JoinMeetingUseCase } from './JoinMeetingUseCase';
 
 export class JoinMeetingController extends BaseController {
@@ -25,19 +25,22 @@ export class JoinMeetingController extends BaseController {
     if (result.isErr()) {
       const error = result.unwrapErr();
       switch (error.type) {
-        case ValidationError.type:
-          return this.unprocessableEntity<BaseErrorResponse>((error as ValidationError).toResponse);
+        case AppErrors.UnexpectedError:
+          return this.internalError<BaseErrorResponse>(error.toResponse);
 
-        case MeetingNotFoundError.type:
-          return this.notFound<BaseErrorResponse>((error as MeetingNotFoundError).toResponse);
+        case AppErrors.ValidationError:
+          return this.unprocessableEntity<BaseErrorResponse>(error.toResponse);
 
-        case MeetingFullyBooked.type:
-          return this.unprocessableEntity<BaseErrorResponse>(
-            (error as MeetingFullyBooked).toResponse
-          );
+        case MeetingErrors.MeetingNotFoundError:
+          return this.notFound<BaseErrorResponse>(error.toResponse);
+
+        case MeetingErrors.MeetingFullyBooked:
+          return this.unprocessableEntity<BaseErrorResponse>(error.toResponse);
 
         default:
-          return this.internalError<BaseErrorResponse>(error.toResponse);
+          return this.internalError<BaseErrorResponse>(
+            UnexpectedError.wrap(error, 'unknown error detected').toResponse
+          );
       }
     }
 

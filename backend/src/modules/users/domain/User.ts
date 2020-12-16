@@ -1,5 +1,5 @@
-import { Entity } from '@src/shared/domain/entity';
 import { Ok, Result } from '@hqoss/monads';
+import { AggregateRoot } from '@src/shared/domain/AggregateRoot';
 import { UserIntroduction } from './UserIntroduction';
 import { UserName } from './UserName';
 import { UserFullName } from './UserFullName';
@@ -15,7 +15,7 @@ export interface UserProps {
 
 type Response = Result<User, void>;
 
-export class User extends Entity<UserProps> {
+export class User extends AggregateRoot<UserProps> {
   get username(): UserName {
     return this.props.username;
   }

@@ -1,19 +1,15 @@
 import dayjs from 'dayjs';
 import { Err, Ok, Result } from '@hqoss/monads';
 import { UseCase } from '@src/shared/core/useCase';
-import { UserRepo } from '@users/repos/UserRepo';
 import { UserName } from '@users/domain/UserName';
 import { MeetingRepo } from '@meetings/repos/MeetingRepo';
 import { MeetingTitle } from '@meetings/domain/MeetingTitle';
 import { MeetingDescription } from '@meetings/domain/MeetingDescription';
 import { Meeting } from '@meetings/domain/Meeting';
-import { Attendee } from '@meetings/domain/Attendee';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
-import { User } from '@users/domain/User';
 import { MeetingLocation } from '@meetings/domain/MeetingLocation';
 import { MeetingCategory } from '@meetings/domain/MeetingCategory';
-import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
 
@@ -22,14 +18,8 @@ type Response = Result<CreateMeetingResponse, ValidationError | UnexpectedError>
 export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promise<Response>> {
   private meetingRepo: MeetingRepo;
 
-  private userRepo: UserRepo;
-
-  private attendeeRepo: AttendeeRepo;
-
-  constructor(userRepo: UserRepo, meetingRepo: MeetingRepo, attendeeRepo: AttendeeRepo) {
-    this.userRepo = userRepo;
+  constructor(meetingRepo: MeetingRepo) {
     this.meetingRepo = meetingRepo;
-    this.attendeeRepo = attendeeRepo;
   }
 
   async execute(request: CreateMeetingRequest): Promise<Response> {
@@ -68,28 +58,8 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
       })
     ).unwrap();
 
-    let organizer: User;
     try {
-      [organizer] = await Promise.all<User, void>([
-        this.userRepo.findByUserName(organizerOrError.unwrap()),
-        this.meetingRepo.save(meeting),
-      ]);
-    } catch (error) {
-      return Err(UnexpectedError.wrap(error));
-    }
-
-    const organizerAsAttendee = Attendee.create({
-      username: organizer.username,
-      fullName: organizer.fullName,
-      meetingID: meeting.id,
-      joinedMeetingOn: new Date(),
-      meetingStartsAt: meeting.startsAt,
-      meetingTitle: meeting.title,
-      isOrganizer: true,
-    }).unwrap();
-
-    try {
-      await this.attendeeRepo.save(organizerAsAttendee);
+      await this.meetingRepo.save(meeting);
       return Ok<CreateMeetingResponse>({
         id: meeting.id.id.toString(),
       });

@@ -1,8 +1,8 @@
 import { Result, Ok } from '@hqoss/monads';
-import { Entity } from '@src/shared/domain/entity';
 import { UniqueID } from '@src/shared/domain/uniqueId';
 import { UserName } from '@users/domain/UserName';
 import { UserFullName } from '@users/domain/UserFullName';
+import { AggregateRoot } from '@src/shared/domain/AggregateRoot';
 import { MeetingID } from './MeetingID';
 import { MeetingTitle } from './MeetingTitle';
 
@@ -16,7 +16,7 @@ export interface AttendeeProps {
   isOrganizer?: boolean;
 }
 
-export class Attendee extends Entity<AttendeeProps> {
+export class Attendee extends AggregateRoot<AttendeeProps> {
   get username(): UserName {
     return this.props.username;
   }

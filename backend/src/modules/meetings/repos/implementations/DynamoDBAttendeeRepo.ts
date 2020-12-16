@@ -13,6 +13,7 @@ import { AttendeeMap } from '@meetings/mappers/AttendeeMap';
 import { AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
 import { AttendeeDetails } from '@meetings/domain/AttendeeDetails';
 import { AttendeeDetailsMap } from '@meetings/mappers/AttendeeDetailsMap';
+import { EventPublisher } from '@src/shared/domain/EventPublisher';
 import { AttendeeRepo } from '../AttendeeRepo';
 
 export class DynamoDBAttendeeRepo implements AttendeeRepo {
@@ -41,6 +42,7 @@ export class DynamoDBAttendeeRepo implements AttendeeRepo {
 
     try {
       await this.client.putItem(item).promise();
+      await EventPublisher.dispatchAggregateEvents(attendee);
     } catch (error) {
       throw UnexpectedError.wrap(
         error,

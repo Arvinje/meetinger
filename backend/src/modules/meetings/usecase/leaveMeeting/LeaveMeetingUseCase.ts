@@ -8,9 +8,8 @@ import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { UniqueID } from '@src/shared/domain/uniqueId';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
-import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
-import { AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
-import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
+import { MeetingErrors, MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
+import { AttendeeErrors, AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
 import { LeaveMeetingRequest } from './LeaveMeetingRequest';
 import { OrganizerCannotLeaveError } from './LeaveMeetingErrors';
 
@@ -52,8 +51,8 @@ export class LeaveMeetingUseCase implements UseCase<LeaveMeetingRequest, Promise
       ]);
     } catch (error) {
       switch (error.type) {
-        case AttendeeNotFoundError.type:
-        case MeetingNotFoundError.type:
+        case AttendeeErrors.AttendeeNotFoundError:
+        case MeetingErrors.MeetingNotFoundError:
           return Err<never, MeetingNotFoundError | AttendeeNotFoundError>(error);
 
         default:
@@ -63,22 +62,12 @@ export class LeaveMeetingUseCase implements UseCase<LeaveMeetingRequest, Promise
 
     if (attendee.isOrganizer) return Err(OrganizerCannotLeaveError.create());
 
-    const remainingSeatsOrError = await MeetingRemainingSeats.create(
-      meeting.remainingSeats.value + 1
-    );
-    if (remainingSeatsOrError.isErr()) return Err(remainingSeatsOrError.unwrapErr());
-
-    const remainingSeatsUpdated = meeting.updateRemainingSeats(remainingSeatsOrError.unwrap());
-    if (remainingSeatsUpdated.isErr()) return Err(remainingSeatsUpdated.unwrapErr());
+    const leaveOrError = await meeting.removeAttendee(attendee.username);
+    if (leaveOrError.isErr()) return Err(leaveOrError.unwrapErr());
 
     try {
       await this.meetingRepo.save(meeting, meetingVersion);
-    } catch (error) {
-      return Err(UnexpectedError.wrap(error));
-    }
-
-    try {
-      return Ok(await this.attendeeRepo.remove(attendee.username, meetingID));
+      return Ok(undefined);
     } catch (error) {
       return Err(UnexpectedError.wrap(error));
     }

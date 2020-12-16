@@ -6,7 +6,7 @@ import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { UniqueID } from '@src/shared/domain/uniqueId';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
-import { AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
+import { AttendeeErrors, AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
 import { GetAttendanceRequest } from './GetAttendanceRequest';
 import { GetAttendanceResponse } from './GetAttendanceResponse';
 
@@ -33,7 +33,7 @@ export class GetAttendanceUseCase implements UseCase<GetAttendanceRequest, Promi
       [attendee] = await this.attendeeRepo.fetch(userNameOrError.unwrap(), meetingID);
     } catch (error) {
       switch (error.type) {
-        case AttendeeNotFoundError.type:
+        case AttendeeErrors.AttendeeNotFoundError:
           return Err<never, AttendeeNotFoundError>(error);
 
         default:

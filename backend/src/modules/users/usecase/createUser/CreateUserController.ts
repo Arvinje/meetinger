@@ -2,9 +2,9 @@ import 'source-map-support/register';
 import { CognitoUserPoolTriggerEvent } from 'aws-lambda';
 import { CreateUserRequest } from '@users/usecase/createUser/CreateUserRequest';
 import { CreateUserUseCase } from '@users/usecase/createUser/CreateUserUseCase';
-import { UnexpectedError } from '@src/shared/core/AppError';
+import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 
-type Response = CognitoUserPoolTriggerEvent | UnexpectedError;
+type Response = CognitoUserPoolTriggerEvent | ValidationError | UnexpectedError;
 
 export class CreateUserController {
   private useCase: CreateUserUseCase;
