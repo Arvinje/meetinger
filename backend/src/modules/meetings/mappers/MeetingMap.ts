@@ -9,6 +9,7 @@ import { MeetingTitle } from '@meetings/domain/MeetingTitle';
 import { MeetingLocation } from '@meetings/domain/MeetingLocation';
 import { MeetingCategory } from '@meetings/domain/MeetingCategory';
 import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
+import { Attendees } from '../domain/Attendees';
 
 export class MeetingMap {
   public static async dynamoToDomain(raw: AttributeMap): Promise<Meeting> {
@@ -22,6 +23,12 @@ export class MeetingMap {
     const startsAt = new Date(rawStartsAt);
     const location = (await MeetingLocation.create(raw.GSI1PK.S.split('#')[0])).unwrap();
     const createdBy = (await UserName.create(raw.GSI2PK.S.split('#')[0])).unwrap();
+
+    const usernames = await Promise.all(
+      raw.Attendees.SS.map(async (us: string) => (await UserName.create(us)).unwrap())
+    );
+    const attendees = Attendees.create(usernames).unwrap();
+
     const availableSeats = (
       await MeetingAvailableSeats.create(Number(raw.AvailableSeats.N))
     ).unwrap();
@@ -37,6 +44,7 @@ export class MeetingMap {
         startsAt,
         location,
         createdBy,
+        attendees,
         remainingSeats,
         availableSeats,
       },
@@ -57,6 +65,7 @@ export class MeetingMap {
       GSI2SK: { S: meeting.startsAt.toISOString() },
       Title: { S: meeting.title.value },
       Description: { S: meeting.description.value },
+      Attendees: { SS: meeting.attendees.value.map((u: UserName) => u.value) },
       RemainingSeats: { N: meeting.remainingSeats.value.toString() },
       AvailableSeats: { N: meeting.availableSeats.value.toString() },
       Version: { N: version.toString() },

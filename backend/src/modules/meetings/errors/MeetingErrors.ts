@@ -4,6 +4,7 @@ import { BaseError } from '@src/shared/core/BaseError';
 export enum MeetingErrors {
   MeetingNotFoundError = 'MeetingNotFoundError',
   MeetingFullyBooked = 'MeetingFullyBooked',
+  OrganizerCannotLeaveError = 'OrganizerCannotLeaveError',
 }
 
 export class MeetingNotFoundError extends BaseError {
@@ -35,5 +36,21 @@ export class MeetingFullyBooked extends BaseError {
 
   public static wrap(error: unknown, message?: string): MeetingFullyBooked {
     return new MeetingFullyBooked(MeetingErrors.MeetingFullyBooked, error, message);
+  }
+}
+
+export class OrganizerCannotLeaveError extends BaseError {
+  type: MeetingErrors.OrganizerCannotLeaveError;
+
+  public static create(message?: string): OrganizerCannotLeaveError {
+    return new OrganizerCannotLeaveError(
+      MeetingErrors.OrganizerCannotLeaveError,
+      null,
+      message || 'The meeting organizer cannot leave the meeting'
+    );
+  }
+
+  public static wrap(error: unknown, message?: string): OrganizerCannotLeaveError {
+    return new OrganizerCannotLeaveError(MeetingErrors.OrganizerCannotLeaveError, error, message);
   }
 }

@@ -46,17 +46,17 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
       return Err(ValidationError.create('Count of available seats is not valid'));
     }
 
-    const meeting = (
-      await Meeting.create({
-        title: titleOrError.unwrap(),
-        description: descOrError.unwrap(),
-        category: categoryOrError.unwrap(),
-        startsAt: startsAt.toDate(),
-        location: locationOrError.unwrap(),
-        createdBy: organizerOrError.unwrap(),
-        availableSeats: availableSeatsOrError.unwrap(),
-      })
-    ).unwrap();
+    const meetingOrError = await Meeting.create({
+      title: titleOrError.unwrap(),
+      description: descOrError.unwrap(),
+      category: categoryOrError.unwrap(),
+      startsAt: startsAt.toDate(),
+      location: locationOrError.unwrap(),
+      createdBy: organizerOrError.unwrap(),
+      availableSeats: availableSeatsOrError.unwrap(),
+    });
+    if (meetingOrError.isErr()) return Err(meetingOrError.unwrapErr());
+    const meeting = meetingOrError.unwrap();
 
     try {
       await this.meetingRepo.save(meeting);

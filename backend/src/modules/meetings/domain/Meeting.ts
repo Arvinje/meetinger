@@ -2,7 +2,7 @@ import { UniqueID } from '@src/shared/domain/uniqueId';
 import { Result, Ok, Err } from '@hqoss/monads';
 import { UserName } from '@users/domain/UserName';
 import { AggregateRoot } from '@src/shared/domain/AggregateRoot';
-import { MeetingFullyBooked } from '@meetings/errors/MeetingErrors';
+import { MeetingFullyBooked, OrganizerCannotLeaveError } from '@meetings/errors/MeetingErrors';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { MeetingID } from './MeetingID';
 import { MeetingTitle } from './MeetingTitle';
@@ -14,6 +14,7 @@ import { MeetingCategory } from './MeetingCategory';
 import { MeetingCreated } from './events/MeetingCreated';
 import { AttendeeJoined } from './events/AttendeeJoined';
 import { AttendeeLeft } from './events/AttendeeLeft';
+import { Attendees } from './Attendees';
 
 export interface MeetingProps {
   title: MeetingTitle;
@@ -21,6 +22,7 @@ export interface MeetingProps {
   category: MeetingCategory;
   startsAt: Date;
   location: MeetingLocation;
+  attendees?: Attendees;
   remainingSeats?: MeetingRemainingSeats;
   availableSeats: MeetingAvailableSeats;
   createdBy: UserName;
@@ -53,6 +55,10 @@ export class Meeting extends AggregateRoot<MeetingProps> {
     return this.props.location;
   }
 
+  get attendees(): Attendees {
+    return this.props.attendees;
+  }
+
   get remainingSeats(): MeetingRemainingSeats {
     return this.props.remainingSeats;
   }
@@ -74,14 +80,25 @@ export class Meeting extends AggregateRoot<MeetingProps> {
     super(props, id);
   }
 
-  public static async create(props: MeetingProps, id?: UniqueID): Promise<Result<Meeting, void>> {
+  public static async create(
+    props: MeetingProps,
+    id?: UniqueID
+  ): Promise<Result<Meeting, ValidationError>> {
     const defaultProps: MeetingProps = {
       ...props,
       createdAt: props.createdAt || new Date(),
+      attendees: props.attendees || Attendees.create([props.createdBy]).unwrap(),
       remainingSeats:
         props.remainingSeats ||
         (await MeetingRemainingSeats.create(props.availableSeats.value - 1)).unwrap(),
     };
+
+    if (
+      defaultProps.attendees.count !==
+      defaultProps.availableSeats.value - defaultProps.remainingSeats.value
+    )
+      return Err(ValidationError.create('number of attendees and the taken seats do not match'));
+
     const meeting = new Meeting(defaultProps, id);
 
     const isNewMeeting = !!id === false;
@@ -98,9 +115,12 @@ export class Meeting extends AggregateRoot<MeetingProps> {
   ): Promise<Result<void, MeetingFullyBooked | ValidationError | UnexpectedError>> {
     if (this.remainingSeats.value === 0) return Err(MeetingFullyBooked.create());
 
-    const remainingOrError = await this.props.remainingSeats.subtract(1);
-    if (remainingOrError.isErr()) return Err(remainingOrError.unwrapErr());
-    this.props.remainingSeats = remainingOrError.unwrap();
+    const attendeesOrError = this.props.attendees.add(username);
+    if (attendeesOrError.isErr()) return Err(attendeesOrError.unwrapErr());
+    this.props.attendees = attendeesOrError.unwrap();
+
+    const remainingSeatsRes = await this.calculateRemainingSeats();
+    if (remainingSeatsRes.isErr()) return Err(remainingSeatsRes.unwrapErr());
 
     this.registerEvent(new AttendeeJoined(this, username, false));
     return Ok(undefined);
@@ -108,15 +128,31 @@ export class Meeting extends AggregateRoot<MeetingProps> {
 
   public async removeAttendee(
     username: UserName
-  ): Promise<Result<void, ValidationError | UnexpectedError>> {
+  ): Promise<Result<void, OrganizerCannotLeaveError | ValidationError | UnexpectedError>> {
     if (this.remainingSeats.value === this.availableSeats.value)
       return Err(ValidationError.create('cannot remove a non-existing attendee'));
 
-    const remainingOrError = await this.props.remainingSeats.add(1);
-    if (remainingOrError.isErr()) return Err(remainingOrError.unwrapErr());
-    this.props.remainingSeats = remainingOrError.unwrap();
+    if (this.createdBy.equals(username)) return Err(OrganizerCannotLeaveError.create());
+
+    const attendeesOrError = this.props.attendees.remove(username);
+    if (attendeesOrError.isErr()) return Err(attendeesOrError.unwrapErr());
+    this.props.attendees = attendeesOrError.unwrap();
+
+    const remainingSeatsRes = await this.calculateRemainingSeats();
+    if (remainingSeatsRes.isErr()) return Err(remainingSeatsRes.unwrapErr());
 
     this.registerEvent(new AttendeeLeft(this, username));
+    return Ok(undefined);
+  }
+
+  private async calculateRemainingSeats(): Promise<
+    Result<void, ValidationError | UnexpectedError>
+  > {
+    const remainingOrError = await MeetingRemainingSeats.create(
+      this.availableSeats.value - this.attendees.count
+    );
+    if (remainingOrError.isErr()) return Err(remainingOrError.unwrapErr());
+    this.props.remainingSeats = remainingOrError.unwrap();
     return Ok(undefined);
   }
 }

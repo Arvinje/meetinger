@@ -6,7 +6,6 @@ import { AppErrors, UnexpectedError } from '@src/shared/core/AppError';
 import { BaseErrorResponse } from '@src/shared/core/BaseError';
 import { MeetingErrors } from '@meetings/errors/MeetingErrors';
 import { AttendeeErrors } from '@meetings/errors/AttendeeErrors';
-import { LeaveMeetingErrors } from './LeaveMeetingErrors';
 import { LeaveMeetingUseCase } from './LeaveMeetingUseCase';
 
 export class LeaveMeetingController extends BaseController {
@@ -39,7 +38,7 @@ export class LeaveMeetingController extends BaseController {
         case AttendeeErrors.AttendeeNotFoundError:
           return this.notFound<BaseErrorResponse>(error.toResponse);
 
-        case LeaveMeetingErrors.OrganizerCannotLeaveError:
+        case MeetingErrors.OrganizerCannotLeaveError:
           return this.unprocessableEntity<BaseErrorResponse>(error.toResponse);
 
         default:

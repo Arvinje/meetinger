@@ -2,7 +2,6 @@ import 'source-map-support/register';
 import DDBConfig from '@src/shared/infra/dynamodb/dynamodb';
 import { DynamoDBMeetingRepo } from '@meetings/repos/implementations/DynamoDBMeetingRepo';
 import { APIGatewayWithAuthorizerHandler } from '@src/shared/infra/http/types';
-import { DynamoDBAttendeeRepo } from '@meetings/repos/implementations/DynamoDBAttendeeRepo';
 import { OnAttendeeJoined } from '@meetings/listeners/OnAttendeeJoined';
 import { OnMeetingCreated } from '@meetings/listeners/OnMeetingCreated';
 import { SNSBroker, SNSConfig } from '@src/shared/infra/brokers/SNSBroker';
@@ -14,10 +13,9 @@ const broker = new SNSBroker(SNSConfig);
 
 // Repositories
 const meetingRepo = new DynamoDBMeetingRepo(DDBConfig);
-const attendeeRepo = new DynamoDBAttendeeRepo(DDBConfig);
 
 // Use Cases
-const usecase = new JoinMeetingUseCase(meetingRepo, attendeeRepo);
+const usecase = new JoinMeetingUseCase(meetingRepo);
 
 // Subscriptions
 new OnMeetingCreated(broker).subscribe();

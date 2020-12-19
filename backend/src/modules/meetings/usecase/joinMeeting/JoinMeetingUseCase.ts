@@ -6,7 +6,6 @@ import { UserName } from '@users/domain/UserName';
 import { MeetingRepo } from '@meetings/repos/MeetingRepo';
 import { Meeting } from '@meetings/domain/Meeting';
 import { MeetingID } from '@meetings/domain/MeetingID';
-import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
 import { MeetingNotFoundError, MeetingFullyBooked } from '@meetings/errors/MeetingErrors';
 import { JoinMeetingRequest } from './JoinMeetingRequest';
 
@@ -18,11 +17,8 @@ type Response = Result<
 export class JoinMeetingUseCase implements UseCase<JoinMeetingRequest, Promise<Response>> {
   private meetingRepo: MeetingRepo;
 
-  private attendeeRepo: AttendeeRepo;
-
-  constructor(meetingRepo: MeetingRepo, attendeeRepo: AttendeeRepo) {
+  constructor(meetingRepo: MeetingRepo) {
     this.meetingRepo = meetingRepo;
-    this.attendeeRepo = attendeeRepo;
   }
 
   async execute(request: JoinMeetingRequest): Promise<Response> {
@@ -30,16 +26,6 @@ export class JoinMeetingUseCase implements UseCase<JoinMeetingRequest, Promise<R
 
     const userNameOrError = await UserName.create(request.attendeeUserName);
     if (userNameOrError.isErr()) return Err(userNameOrError.unwrapErr());
-
-    try {
-      const attendeeAlreadyExists = await this.attendeeRepo.exists(
-        userNameOrError.unwrap(),
-        meetingID
-      );
-      if (attendeeAlreadyExists) return Ok(undefined);
-    } catch (error) {
-      return Err(UnexpectedError.wrap(error));
-    }
 
     let meeting: Meeting;
     let meetingVersion: number;

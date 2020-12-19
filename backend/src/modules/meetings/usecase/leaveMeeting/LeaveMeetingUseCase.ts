@@ -8,10 +8,13 @@ import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { UniqueID } from '@src/shared/domain/uniqueId';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
-import { MeetingErrors, MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
+import {
+  MeetingErrors,
+  MeetingNotFoundError,
+  OrganizerCannotLeaveError,
+} from '@meetings/errors/MeetingErrors';
 import { AttendeeErrors, AttendeeNotFoundError } from '@meetings/errors/AttendeeErrors';
 import { LeaveMeetingRequest } from './LeaveMeetingRequest';
-import { OrganizerCannotLeaveError } from './LeaveMeetingErrors';
 
 type Response = Result<
   void,
@@ -59,8 +62,6 @@ export class LeaveMeetingUseCase implements UseCase<LeaveMeetingRequest, Promise
           return Err(UnexpectedError.wrap(error));
       }
     }
-
-    if (attendee.isOrganizer) return Err(OrganizerCannotLeaveError.create());
 
     const leaveOrError = await meeting.removeAttendee(attendee.username);
     if (leaveOrError.isErr()) return Err(leaveOrError.unwrapErr());
