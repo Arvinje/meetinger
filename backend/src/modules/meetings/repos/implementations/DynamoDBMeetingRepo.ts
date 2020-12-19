@@ -16,6 +16,9 @@ import { MeetingCategory } from '@meetings/domain/MeetingCategory';
 import { MeetingLocation } from '@meetings/domain/MeetingLocation';
 import { MeetingItemViewMap } from '@meetings/mappers/MeetingItemViewMap';
 import { EventPublisher } from '@src/shared/domain/EventPublisher';
+import { UserName } from '@users/domain/UserName';
+import { RegisteredMeetingView } from '@meetings/domain/RegisteredMeetingView';
+import { RegisteredMeetingMap } from '@meetings/mappers/RegisteredMeetingMap';
 import { MeetingRepo } from '../MeetingRepo';
 
 export class DynamoDBMeetingRepo implements MeetingRepo {
@@ -122,5 +125,34 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
     }
 
     return queryResult.Items.map((item) => MeetingItemViewMap.dynamoToDomain(item));
+  }
+
+  async fetchRegisteredMeetingViews(username: UserName): Promise<RegisteredMeetingView[]> {
+    const input: QueryInput = {
+      TableName: this.tables.MainTable,
+      IndexName: 'GSI1',
+      KeyConditionExpression: '#GSI1PK = :GSI1PK',
+      ScanIndexForward: true,
+      ExpressionAttributeNames: {
+        '#GSI1PK': 'GSI1PK',
+      },
+      ExpressionAttributeValues: {
+        ':GSI1PK': {
+          S: `${username.value}#MEETINGS`,
+        },
+      },
+    };
+
+    let queryResult: QueryOutput;
+    try {
+      queryResult = await this.client.query(input).promise();
+    } catch (error) {
+      throw UnexpectedError.wrap(
+        error,
+        `Failed to list registered meetings for Attende(${username.value})`
+      );
+    }
+
+    return queryResult.Items.map((item) => RegisteredMeetingMap.dynamoToDomain(item));
   }
 }
