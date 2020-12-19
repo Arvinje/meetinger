@@ -181,7 +181,6 @@ functions:
       - http:
           path: meetings
           method: get
-          authorizer: *authorizer
 
   GetAttendance:
     handler: src/modules/meetings/usecase/getAttendance/index.handler
