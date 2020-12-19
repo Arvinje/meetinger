@@ -3,7 +3,7 @@ import DDBConfig from '@src/shared/infra/dynamodb/dynamodb';
 import { DynamoDBMeetingRepo } from '@meetings/repos/implementations/DynamoDBMeetingRepo';
 import { DynamoDBAttendeeRepo } from '@meetings/repos/implementations/DynamoDBAttendeeRepo';
 import { SNSHandler } from 'aws-lambda';
-import { DynamoDBUserRepo } from '@src/modules/users/repos/implementations/DynamoDBUserRepo';
+import { DynamoDBUserRepo } from '@users/repos/implementations/DynamoDBUserRepo';
 import { PersistAttendeeUseCase } from './PersistAttendeeUseCase';
 import { PersistAttendeeController } from './PersistAttendeeController';
 
