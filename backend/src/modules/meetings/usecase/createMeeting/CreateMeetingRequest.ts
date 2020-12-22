@@ -4,6 +4,7 @@ export interface CreateMeetingRequest {
   description: string;
   category: string;
   startsAt: string;
-  location: string;
+  place: string;
+  address?: string;
   availableSeats: number;
 }

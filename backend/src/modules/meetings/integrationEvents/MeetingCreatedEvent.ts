@@ -4,7 +4,7 @@ export interface MeetingCreatedEvent {
   description: string;
   category: string;
   startsAt: Date;
-  location: string;
+  place: string;
   availableSeats: number;
   createdBy: string;
 }

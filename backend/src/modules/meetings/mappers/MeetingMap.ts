@@ -6,10 +6,11 @@ import { UserName } from '@users/domain/UserName';
 import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
 import { MeetingDescription } from '@meetings/domain/MeetingDescription';
 import { MeetingTitle } from '@meetings/domain/MeetingTitle';
-import { MeetingLocation } from '@meetings/domain/MeetingLocation';
+import { MeetingPlace } from '@meetings/domain/MeetingPlace';
 import { MeetingCategory } from '@meetings/domain/MeetingCategory';
 import { MeetingRemainingSeats } from '@meetings/domain/MeetingRemainingSeats';
-import { Attendees } from '../domain/Attendees';
+import { Attendees } from '@meetings/domain/Attendees';
+import { MeetingAddress } from '@meetings/domain/MeetingAddress';
 
 export class MeetingMap {
   public static async dynamoToDomain(raw: AttributeMap): Promise<Meeting> {
@@ -21,8 +22,13 @@ export class MeetingMap {
     const category = (await MeetingCategory.create(rawCategory)).unwrap();
 
     const startsAt = new Date(rawStartsAt);
-    const location = (await MeetingLocation.create(raw.GSI1PK.S.split('#')[0])).unwrap();
+    const place = (await MeetingPlace.create(raw.GSI1PK.S.split('#')[0])).unwrap();
     const createdBy = (await UserName.create(raw.GSI2PK.S.split('#')[0])).unwrap();
+
+    let address: MeetingAddress;
+    if (place.isPhysical) {
+      address = (await MeetingAddress.create(raw.Address.S)).unwrap();
+    }
 
     const usernames = await Promise.all(
       raw.Attendees.SS.map(async (us: string) => (await UserName.create(us)).unwrap())
@@ -42,7 +48,8 @@ export class MeetingMap {
         description,
         category,
         startsAt,
-        location,
+        place,
+        address,
         createdBy,
         attendees,
         remainingSeats,
@@ -56,10 +63,10 @@ export class MeetingMap {
 
   public static toDynamoFull(meeting: Meeting, version: number): PutItemInputAttributeMap {
     const startsAt = dayjs(meeting.startsAt);
-    return {
+    let input: PutItemInputAttributeMap = {
       PK: { S: meeting.id.id.toString() },
       SK: { S: 'META' },
-      GSI1PK: { S: `${meeting.location.value}#${startsAt.format('YYYY-MM')}#MEETINGS` },
+      GSI1PK: { S: `${meeting.place.value}#${startsAt.format('YYYY-MM')}#MEETINGS` },
       GSI1SK: { S: `${meeting.category.value}#${meeting.startsAt.toISOString()}` },
       GSI2PK: { S: `${meeting.createdBy.value}#MEETINGS` },
       GSI2SK: { S: meeting.startsAt.toISOString() },
@@ -70,5 +77,11 @@ export class MeetingMap {
       AvailableSeats: { N: meeting.availableSeats.value.toString() },
       Version: { N: version.toString() },
     };
+
+    if (meeting.address) {
+      input = { ...input, Address: { S: meeting.address.value } };
+    }
+
+    return input;
   }
 }

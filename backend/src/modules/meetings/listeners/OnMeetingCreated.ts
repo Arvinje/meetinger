@@ -23,7 +23,7 @@ export class OnMeetingCreated implements EventListener {
       description: event.meeting.description.value,
       category: event.meeting.category.value,
       startsAt: event.meeting.startsAt,
-      location: event.meeting.location.value,
+      place: event.meeting.place.value,
       availableSeats: event.meeting.availableSeats.value,
       createdBy: event.meeting.createdBy.value,
     };

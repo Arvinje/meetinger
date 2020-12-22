@@ -1,5 +1,5 @@
 export interface ListMeetingsRequest {
-  location: string;
+  place: string;
   month?: string;
   category?: string;
 }

@@ -4,7 +4,8 @@ export interface MeetingDTO {
   description: string;
   category: string;
   startsAt: string;
-  location: string;
+  place: string;
+  address?: string;
   remainingSeats: number;
   availableSeats: number;
   createdBy: string;

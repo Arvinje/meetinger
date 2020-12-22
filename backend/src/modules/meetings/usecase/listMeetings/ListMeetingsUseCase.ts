@@ -7,7 +7,7 @@ import {
 } from '@meetings/domain/MeetingCategory';
 import { MeetingRepo } from '@meetings/repos/MeetingRepo';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
-import { MeetingLocation } from '@meetings/domain/MeetingLocation';
+import { MeetingPlace } from '@meetings/domain/MeetingPlace';
 import { MeetingItemView } from '@meetings/domain/MeetingItemView';
 import { MeetingItemViewMap } from '@meetings/mappers/MeetingItemViewMap';
 import { ListMeetingsRequest } from './ListMeetingsRequest';
@@ -23,8 +23,8 @@ export class ListMeetingsUseCase implements UseCase<ListMeetingsRequest, Promise
   }
 
   async execute(request: ListMeetingsRequest): Promise<Response> {
-    const locationOrError = await MeetingLocation.create(request.location);
-    if (locationOrError.isErr()) return Err(locationOrError.unwrapErr());
+    const placeOrError = await MeetingPlace.create(request.place);
+    if (placeOrError.isErr()) return Err(placeOrError.unwrapErr());
 
     let catOrError: MeetingCategoryResponse;
     if (request.category) {
@@ -44,7 +44,7 @@ export class ListMeetingsUseCase implements UseCase<ListMeetingsRequest, Promise
     let meetingItemViews: MeetingItemView[];
     try {
       meetingItemViews = await this.meetingRepo.fetchMeetingItemViews(
-        locationOrError.unwrap(),
+        placeOrError.unwrap(),
         month,
         catOrError ? catOrError.unwrap() : undefined
       );

@@ -13,7 +13,7 @@ import { MeetingMap } from '@meetings/mappers/MeetingMap';
 import { MeetingNotFoundError } from '@meetings/errors/MeetingErrors';
 import { MeetingItemView } from '@meetings/domain/MeetingItemView';
 import { MeetingCategory } from '@meetings/domain/MeetingCategory';
-import { MeetingLocation } from '@meetings/domain/MeetingLocation';
+import { MeetingPlace } from '@meetings/domain/MeetingPlace';
 import { MeetingItemViewMap } from '@meetings/mappers/MeetingItemViewMap';
 import { EventPublisher } from '@src/shared/domain/EventPublisher';
 import { UserName } from '@users/domain/UserName';
@@ -79,7 +79,7 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
   }
 
   async fetchMeetingItemViews(
-    location: MeetingLocation,
+    place: MeetingPlace,
     month: string,
     category?: MeetingCategory
   ): Promise<MeetingItemView[]> {
@@ -93,7 +93,7 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
       },
       ExpressionAttributeValues: {
         ':GSI1PK': {
-          S: `${location.value}#${month}#MEETINGS`,
+          S: `${place.value}#${month}#MEETINGS`,
         },
       },
     };
@@ -118,7 +118,7 @@ export class DynamoDBMeetingRepo implements MeetingRepo {
     } catch (error) {
       throw UnexpectedError.wrap(
         error,
-        `Failed to list meetings at ${location.value} in ${month}${
+        `Failed to list meetings at ${place.value} in ${month}${
           category ? ` tagged ${category.value}` : ''
         }`
       );

@@ -9,19 +9,21 @@ import { MeetingTitle } from './MeetingTitle';
 import { MeetingDescription } from './MeetingDescription';
 import { MeetingRemainingSeats } from './MeetingRemainingSeats';
 import { MeetingAvailableSeats } from './MeetingAvailableSeats';
-import { MeetingLocation } from './MeetingLocation';
+import { MeetingAddress } from './MeetingAddress';
 import { MeetingCategory } from './MeetingCategory';
 import { MeetingCreated } from './events/MeetingCreated';
 import { AttendeeJoined } from './events/AttendeeJoined';
 import { AttendeeLeft } from './events/AttendeeLeft';
 import { Attendees } from './Attendees';
+import { MeetingPlace } from './MeetingPlace';
 
 export interface MeetingProps {
   title: MeetingTitle;
   description: MeetingDescription;
   category: MeetingCategory;
   startsAt: Date;
-  location: MeetingLocation;
+  place: MeetingPlace;
+  address?: MeetingAddress;
   attendees?: Attendees;
   remainingSeats?: MeetingRemainingSeats;
   availableSeats: MeetingAvailableSeats;
@@ -51,8 +53,20 @@ export class Meeting extends AggregateRoot<MeetingProps> {
     return this.props.startsAt;
   }
 
-  get location(): MeetingLocation {
-    return this.props.location;
+  get place(): MeetingPlace {
+    return this.props.place;
+  }
+
+  get isRemote(): boolean {
+    return this.props.place.isRemote;
+  }
+
+  get isPhysical(): boolean {
+    return this.props.place.isPhysical;
+  }
+
+  get address(): MeetingAddress {
+    return this.props.address;
   }
 
   get attendees(): Attendees {
@@ -92,6 +106,12 @@ export class Meeting extends AggregateRoot<MeetingProps> {
         props.remainingSeats ||
         (await MeetingRemainingSeats.create(props.availableSeats.value - 1)).unwrap(),
     };
+
+    if (props.place.isPhysical && !props.address)
+      return Err(ValidationError.create('A venue address has to be provided for the meeting'));
+
+    if (props.place.isRemote && props.address)
+      return Err(ValidationError.create('A remote meeting cannot have a physical address'));
 
     if (
       defaultProps.attendees.count !==

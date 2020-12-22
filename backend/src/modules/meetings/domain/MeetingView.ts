@@ -8,7 +8,8 @@ export interface MeetingViewProps {
   description: string;
   category: string;
   startsAt: Date;
-  location: string;
+  place: string;
+  address?: string;
   remainingSeats: number;
   availableSeats: number;
   createdBy: string;
@@ -36,8 +37,12 @@ export class MeetingView extends ValueObject<MeetingViewProps> {
     return this.props.startsAt;
   }
 
-  get location(): string {
-    return this.props.location;
+  get place(): string {
+    return this.props.place;
+  }
+
+  get address(): string {
+    return this.props.address;
   }
 
   get remainingSeats(): number {

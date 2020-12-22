@@ -8,8 +8,9 @@ import { MeetingDescription } from '@meetings/domain/MeetingDescription';
 import { Meeting } from '@meetings/domain/Meeting';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
-import { MeetingLocation } from '@meetings/domain/MeetingLocation';
+import { MeetingPlace } from '@meetings/domain/MeetingPlace';
 import { MeetingCategory } from '@meetings/domain/MeetingCategory';
+import { MeetingAddress } from '@meetings/domain/MeetingAddress';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
 
@@ -38,8 +39,15 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
     const startsAt = dayjs(request.startsAt);
     if (!startsAt.isValid()) return Err(ValidationError.create('Meeting start time is not valid'));
 
-    const locationOrError = await MeetingLocation.create(request.location);
-    if (locationOrError.isErr()) return Err(locationOrError.unwrapErr());
+    const placeOrError = await MeetingPlace.create(request.place);
+    if (placeOrError.isErr()) return Err(placeOrError.unwrapErr());
+
+    let address: MeetingAddress;
+    if (request.address) {
+      const addressOrError = await MeetingAddress.create(request.address);
+      if (addressOrError.isErr()) return Err(addressOrError.unwrapErr());
+      address = addressOrError.unwrap();
+    }
 
     const availableSeatsOrError = await MeetingAvailableSeats.create(request.availableSeats);
     if (availableSeatsOrError.isErr()) {
@@ -51,7 +59,8 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
       description: descOrError.unwrap(),
       category: categoryOrError.unwrap(),
       startsAt: startsAt.toDate(),
-      location: locationOrError.unwrap(),
+      place: placeOrError.unwrap(),
+      address,
       createdBy: organizerOrError.unwrap(),
       availableSeats: availableSeatsOrError.unwrap(),
     });

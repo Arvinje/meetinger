@@ -19,7 +19,7 @@ export class ListMeetingsController extends BaseController {
     if (!event.queryStringParameters) return this.badRequest<BaseErrorResponse>();
 
     const request: ListMeetingsRequest = {
-      location: event.queryStringParameters.location,
+      place: event.queryStringParameters.place,
       month: event.queryStringParameters.month,
       category: event.queryStringParameters.category,
     };
