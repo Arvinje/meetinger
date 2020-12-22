@@ -2,7 +2,12 @@ import { UniqueID } from '@src/shared/domain/uniqueId';
 import { Result, Ok, Err } from '@hqoss/monads';
 import { UserName } from '@users/domain/UserName';
 import { AggregateRoot } from '@src/shared/domain/AggregateRoot';
-import { MeetingFullyBooked, OrganizerCannotLeaveError } from '@meetings/errors/MeetingErrors';
+import {
+  MeetingFullyBooked,
+  MeetingStartingDateInvalid,
+  OrganizerCannotLeaveError,
+  RemoteMeetingCannotHaveAddress,
+} from '@meetings/errors/MeetingErrors';
 import { UnexpectedError, ValidationError } from '@src/shared/core/AppError';
 import { MeetingID } from './MeetingID';
 import { MeetingTitle } from './MeetingTitle';
@@ -97,7 +102,9 @@ export class Meeting extends AggregateRoot<MeetingProps> {
   public static async create(
     props: MeetingProps,
     id?: UniqueID
-  ): Promise<Result<Meeting, ValidationError>> {
+  ): Promise<
+    Result<Meeting, MeetingStartingDateInvalid | RemoteMeetingCannotHaveAddress | ValidationError>
+  > {
     const defaultProps: MeetingProps = {
       ...props,
       createdAt: props.createdAt || new Date(),
@@ -110,8 +117,9 @@ export class Meeting extends AggregateRoot<MeetingProps> {
     if (props.place.isPhysical && !props.address)
       return Err(ValidationError.create('A venue address has to be provided for the meeting'));
 
-    if (props.place.isRemote && props.address)
-      return Err(ValidationError.create('A remote meeting cannot have a physical address'));
+    if (props.place.isRemote && props.address) return Err(RemoteMeetingCannotHaveAddress.create());
+
+    if (props.startsAt <= new Date()) return Err(MeetingStartingDateInvalid.create());
 
     if (
       defaultProps.attendees.count !==

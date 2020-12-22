@@ -11,10 +11,17 @@ import { MeetingAvailableSeats } from '@meetings/domain/MeetingAvailableSeats';
 import { MeetingPlace } from '@meetings/domain/MeetingPlace';
 import { MeetingCategory } from '@meetings/domain/MeetingCategory';
 import { MeetingAddress } from '@meetings/domain/MeetingAddress';
+import {
+  MeetingStartingDateInvalid,
+  RemoteMeetingCannotHaveAddress,
+} from '@meetings/errors/MeetingErrors';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
 import { CreateMeetingRequest } from './CreateMeetingRequest';
 
-type Response = Result<CreateMeetingResponse, ValidationError | UnexpectedError>;
+type Response = Result<
+  CreateMeetingResponse,
+  MeetingStartingDateInvalid | RemoteMeetingCannotHaveAddress | ValidationError | UnexpectedError
+>;
 
 export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promise<Response>> {
   private meetingRepo: MeetingRepo;
@@ -37,7 +44,7 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
     if (categoryOrError.isErr()) return Err(categoryOrError.unwrapErr());
 
     const startsAt = dayjs(request.startsAt);
-    if (!startsAt.isValid()) return Err(ValidationError.create('Meeting start time is not valid'));
+    if (!startsAt.isValid()) return Err(MeetingStartingDateInvalid.create());
 
     const placeOrError = await MeetingPlace.create(request.place);
     if (placeOrError.isErr()) return Err(placeOrError.unwrapErr());
@@ -50,9 +57,7 @@ export class CreateMeetingUseCase implements UseCase<CreateMeetingRequest, Promi
     }
 
     const availableSeatsOrError = await MeetingAvailableSeats.create(request.availableSeats);
-    if (availableSeatsOrError.isErr()) {
-      return Err(ValidationError.create('Count of available seats is not valid'));
-    }
+    if (availableSeatsOrError.isErr()) return Err(availableSeatsOrError.unwrapErr());
 
     const meetingOrError = await Meeting.create({
       title: titleOrError.unwrap(),

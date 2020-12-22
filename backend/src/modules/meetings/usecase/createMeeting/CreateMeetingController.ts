@@ -5,6 +5,7 @@ import { BaseController } from '@src/shared/infra/http/BaseController';
 import { APIGatewayWithAuthorizerEvent } from '@src/shared/infra/http/types';
 import { AppErrors, UnexpectedError } from '@src/shared/core/AppError';
 import { BaseErrorResponse } from '@src/shared/core/BaseError';
+import { MeetingErrors } from '@meetings/errors/MeetingErrors';
 import { CreateMeetingResponse } from './CreateMeetingResponse';
 
 export class CreateMeetingController extends BaseController {
@@ -23,6 +24,8 @@ export class CreateMeetingController extends BaseController {
     if (result.isErr()) {
       const error = result.unwrapErr();
       switch (error.type) {
+        case MeetingErrors.MeetingStartingDateInvalid:
+        case MeetingErrors.RemoteMeetingCannotHaveAddress:
         case AppErrors.ValidationError:
           return this.unprocessableEntity<BaseErrorResponse>(error.toResponse);
 
