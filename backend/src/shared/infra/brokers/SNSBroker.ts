@@ -6,12 +6,14 @@ interface SNSTopics {
   MeetingCreated: string;
   AttendeeJoined: string;
   AttendeeLeft: string;
+  MeetingChanged: string;
 }
 
 const Topics: SNSTopics = {
   MeetingCreated: process.env.EVENT_MEETING_CREATED_ARN,
   AttendeeJoined: process.env.EVENT_ATTENDEE_JOINED_ARN,
   AttendeeLeft: process.env.EVENT_ATTENDEE_LEFT_ARN,
+  MeetingChanged: process.env.EVENT_MEETING_CHANGED_ARN,
 };
 
 interface Config {

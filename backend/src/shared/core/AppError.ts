@@ -5,6 +5,7 @@ export enum AppErrors {
   UnexpectedError = 'UnexpectedError',
   ValidationError = 'ValidationError',
   UnAuthorizedError = 'UnAuthorizedError',
+  ForbiddenError = 'ForbiddenError',
 }
 
 export class UnexpectedError extends BaseError {
@@ -28,6 +29,18 @@ export class UnAuthorizedError extends BaseError {
 
   public static wrap(error: unknown, message: string): UnAuthorizedError {
     return new UnAuthorizedError(AppErrors.UnAuthorizedError, error, message);
+  }
+}
+
+export class ForbiddenError extends BaseError {
+  type: AppErrors.ForbiddenError;
+
+  public static create(message: string): ForbiddenError {
+    return new ForbiddenError(AppErrors.ForbiddenError, null, message);
+  }
+
+  public static wrap(error: unknown, message: string): ForbiddenError {
+    return new ForbiddenError(AppErrors.ForbiddenError, error, message);
   }
 }
 

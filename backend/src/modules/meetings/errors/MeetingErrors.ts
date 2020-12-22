@@ -5,6 +5,8 @@ export enum MeetingErrors {
   MeetingNotFoundError = 'MeetingNotFoundError',
   MeetingFullyBooked = 'MeetingFullyBooked',
   OrganizerCannotLeaveError = 'OrganizerCannotLeaveError',
+  MeetingStartingDateInvalid = 'MeetingStartingDateInvalid',
+  RemoteMeetingCannotHaveAddress = 'RemoteMeetingCannotHaveAddress',
 }
 
 export class MeetingNotFoundError extends BaseError {
@@ -52,5 +54,41 @@ export class OrganizerCannotLeaveError extends BaseError {
 
   public static wrap(error: unknown, message?: string): OrganizerCannotLeaveError {
     return new OrganizerCannotLeaveError(MeetingErrors.OrganizerCannotLeaveError, error, message);
+  }
+}
+
+export class MeetingStartingDateInvalid extends BaseError {
+  type: MeetingErrors.MeetingStartingDateInvalid;
+
+  public static create(message?: string): MeetingStartingDateInvalid {
+    return new MeetingStartingDateInvalid(
+      MeetingErrors.MeetingStartingDateInvalid,
+      null,
+      message || 'The start time of the meeting is invalid'
+    );
+  }
+
+  public static wrap(error: unknown, message?: string): MeetingStartingDateInvalid {
+    return new MeetingStartingDateInvalid(MeetingErrors.MeetingStartingDateInvalid, error, message);
+  }
+}
+
+export class RemoteMeetingCannotHaveAddress extends BaseError {
+  type: MeetingErrors.RemoteMeetingCannotHaveAddress;
+
+  public static create(message?: string): RemoteMeetingCannotHaveAddress {
+    return new RemoteMeetingCannotHaveAddress(
+      MeetingErrors.RemoteMeetingCannotHaveAddress,
+      null,
+      message || 'A remote meeting cannot have a physical address'
+    );
+  }
+
+  public static wrap(error: unknown, message?: string): RemoteMeetingCannotHaveAddress {
+    return new RemoteMeetingCannotHaveAddress(
+      MeetingErrors.RemoteMeetingCannotHaveAddress,
+      error,
+      message
+    );
   }
 }

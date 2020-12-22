@@ -21,6 +21,7 @@ import { AttendeeJoined } from './events/AttendeeJoined';
 import { AttendeeLeft } from './events/AttendeeLeft';
 import { Attendees } from './Attendees';
 import { MeetingPlace } from './MeetingPlace';
+import { MeetingChanged } from './events/MeetingChanged';
 
 export interface MeetingProps {
   title: MeetingTitle;
@@ -170,6 +171,38 @@ export class Meeting extends AggregateRoot<MeetingProps> {
     if (remainingSeatsRes.isErr()) return Err(remainingSeatsRes.unwrapErr());
 
     this.registerEvent(new AttendeeLeft(this, username));
+    return Ok(undefined);
+  }
+
+  public setTitle(newTitle: MeetingTitle): Result<void, void> {
+    this.props.title = newTitle;
+    this.registerIdempotentEvent(new MeetingChanged(this));
+    return Ok(undefined);
+  }
+
+  public setDescription(newDesc: MeetingDescription): Result<void, void> {
+    this.props.description = newDesc;
+    this.registerIdempotentEvent(new MeetingChanged(this));
+    return Ok(undefined);
+  }
+
+  public setCategory(newCategory: MeetingCategory): Result<void, void> {
+    this.props.category = newCategory;
+    this.registerIdempotentEvent(new MeetingChanged(this));
+    return Ok(undefined);
+  }
+
+  public setStartsAt(newStartsAt: Date): Result<void, MeetingStartingDateInvalid> {
+    if (newStartsAt <= new Date()) return Err(MeetingStartingDateInvalid.create());
+    this.props.startsAt = newStartsAt;
+    this.registerIdempotentEvent(new MeetingChanged(this));
+    return Ok(undefined);
+  }
+
+  public setAddress(newAddress: MeetingAddress): Result<void, RemoteMeetingCannotHaveAddress> {
+    if (this.isRemote) return Err(RemoteMeetingCannotHaveAddress.create());
+    this.props.address = newAddress;
+    this.registerIdempotentEvent(new MeetingChanged(this));
     return Ok(undefined);
   }
 
