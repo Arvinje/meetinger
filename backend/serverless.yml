@@ -231,3 +231,10 @@ functions:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
     events:
       - sns: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeLeft_arn~true}
+  
+  MeetingChangePropagator:
+    handler: src/modules/meetings/usecase/meetingChangePropagator/index.handler
+    environment:
+      MAIN_TABLE_NAME: ${self:custom.mainTableName}
+    events:
+      - sns: ${ssm:/sns/${self:service}/${self:provider.stage}/MeetingChanged_arn~true}

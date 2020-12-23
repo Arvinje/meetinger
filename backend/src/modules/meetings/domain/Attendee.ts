@@ -58,4 +58,14 @@ export class Attendee extends AggregateRoot<AttendeeProps> {
     const attendee = new Attendee(defaultProps, id);
     return Ok(attendee);
   }
+
+  public setMeetingStartsAt(startsAt: Date): Result<void, void> {
+    this.props.meetingStartsAt = startsAt;
+    return Ok(undefined);
+  }
+
+  public setMeetingTitle(title: MeetingTitle): Result<void, void> {
+    this.props.meetingTitle = title;
+    return Ok(undefined);
+  }
 }
