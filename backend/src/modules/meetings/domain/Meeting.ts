@@ -3,6 +3,7 @@ import { Result, Ok, Err } from '@hqoss/monads';
 import { UserName } from '@users/domain/UserName';
 import { AggregateRoot } from '@src/shared/domain/AggregateRoot';
 import {
+  MeetingAlreadyStarted,
   MeetingFullyBooked,
   MeetingStartingDateInvalid,
   OrganizerCannotLeaveError,
@@ -106,6 +107,7 @@ export class Meeting extends AggregateRoot<MeetingProps> {
   ): Promise<
     Result<Meeting, MeetingStartingDateInvalid | RemoteMeetingCannotHaveAddress | ValidationError>
   > {
+    const isNewMeeting = !!id === false;
     const defaultProps: MeetingProps = {
       ...props,
       createdAt: props.createdAt || new Date(),
@@ -120,7 +122,10 @@ export class Meeting extends AggregateRoot<MeetingProps> {
 
     if (props.place.isRemote && props.address) return Err(RemoteMeetingCannotHaveAddress.create());
 
-    if (props.startsAt <= new Date()) return Err(MeetingStartingDateInvalid.create());
+    // Constraints for new meetings
+    if (isNewMeeting) {
+      if (props.startsAt <= new Date()) return Err(MeetingStartingDateInvalid.create());
+    }
 
     if (
       defaultProps.attendees.count !==
@@ -130,7 +135,6 @@ export class Meeting extends AggregateRoot<MeetingProps> {
 
     const meeting = new Meeting(defaultProps, id);
 
-    const isNewMeeting = !!id === false;
     if (isNewMeeting) {
       meeting.registerEvent(new MeetingCreated(meeting));
       meeting.registerEvent(new AttendeeJoined(meeting, defaultProps.createdBy, true));
@@ -141,7 +145,11 @@ export class Meeting extends AggregateRoot<MeetingProps> {
 
   public async addAttendee(
     username: UserName
-  ): Promise<Result<void, MeetingFullyBooked | ValidationError | UnexpectedError>> {
+  ): Promise<
+    Result<void, MeetingFullyBooked | MeetingAlreadyStarted | ValidationError | UnexpectedError>
+  > {
+    if (this.props.startsAt <= new Date()) return Err(MeetingAlreadyStarted.create());
+
     if (this.remainingSeats.value === 0) return Err(MeetingFullyBooked.create());
 
     const attendeesOrError = this.props.attendees.add(username);
@@ -157,7 +165,14 @@ export class Meeting extends AggregateRoot<MeetingProps> {
 
   public async removeAttendee(
     username: UserName
-  ): Promise<Result<void, OrganizerCannotLeaveError | ValidationError | UnexpectedError>> {
+  ): Promise<
+    Result<
+      void,
+      MeetingAlreadyStarted | OrganizerCannotLeaveError | ValidationError | UnexpectedError
+    >
+  > {
+    if (this.props.startsAt <= new Date()) return Err(MeetingAlreadyStarted.create());
+
     if (this.remainingSeats.value === this.availableSeats.value)
       return Err(ValidationError.create('cannot remove a non-existing attendee'));
 
@@ -174,32 +189,41 @@ export class Meeting extends AggregateRoot<MeetingProps> {
     return Ok(undefined);
   }
 
-  public setTitle(newTitle: MeetingTitle): Result<void, void> {
+  public setTitle(newTitle: MeetingTitle): Result<void, MeetingAlreadyStarted> {
+    if (this.props.startsAt <= new Date()) return Err(MeetingAlreadyStarted.create());
     this.props.title = newTitle;
     this.registerIdempotentEvent(new MeetingChanged(this));
     return Ok(undefined);
   }
 
-  public setDescription(newDesc: MeetingDescription): Result<void, void> {
+  public setDescription(newDesc: MeetingDescription): Result<void, MeetingAlreadyStarted> {
+    if (this.props.startsAt <= new Date()) return Err(MeetingAlreadyStarted.create());
     this.props.description = newDesc;
     this.registerIdempotentEvent(new MeetingChanged(this));
     return Ok(undefined);
   }
 
-  public setCategory(newCategory: MeetingCategory): Result<void, void> {
+  public setCategory(newCategory: MeetingCategory): Result<void, MeetingAlreadyStarted> {
+    if (this.props.startsAt <= new Date()) return Err(MeetingAlreadyStarted.create());
     this.props.category = newCategory;
     this.registerIdempotentEvent(new MeetingChanged(this));
     return Ok(undefined);
   }
 
-  public setStartsAt(newStartsAt: Date): Result<void, MeetingStartingDateInvalid> {
+  public setStartsAt(
+    newStartsAt: Date
+  ): Result<void, MeetingAlreadyStarted | MeetingStartingDateInvalid> {
+    if (this.props.startsAt <= new Date()) return Err(MeetingAlreadyStarted.create());
     if (newStartsAt <= new Date()) return Err(MeetingStartingDateInvalid.create());
     this.props.startsAt = newStartsAt;
     this.registerIdempotentEvent(new MeetingChanged(this));
     return Ok(undefined);
   }
 
-  public setAddress(newAddress: MeetingAddress): Result<void, RemoteMeetingCannotHaveAddress> {
+  public setAddress(
+    newAddress: MeetingAddress
+  ): Result<void, MeetingAlreadyStarted | RemoteMeetingCannotHaveAddress> {
+    if (this.props.startsAt <= new Date()) return Err(MeetingAlreadyStarted.create());
     if (this.isRemote) return Err(RemoteMeetingCannotHaveAddress.create());
     this.props.address = newAddress;
     this.registerIdempotentEvent(new MeetingChanged(this));

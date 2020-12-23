@@ -7,6 +7,7 @@ export enum MeetingErrors {
   OrganizerCannotLeaveError = 'OrganizerCannotLeaveError',
   MeetingStartingDateInvalid = 'MeetingStartingDateInvalid',
   RemoteMeetingCannotHaveAddress = 'RemoteMeetingCannotHaveAddress',
+  MeetingAlreadyStarted = 'MeetingAlreadyStarted',
 }
 
 export class MeetingNotFoundError extends BaseError {
@@ -90,5 +91,21 @@ export class RemoteMeetingCannotHaveAddress extends BaseError {
       error,
       message
     );
+  }
+}
+
+export class MeetingAlreadyStarted extends BaseError {
+  type: MeetingErrors.MeetingAlreadyStarted;
+
+  public static create(message?: string): MeetingAlreadyStarted {
+    return new MeetingAlreadyStarted(
+      MeetingErrors.MeetingAlreadyStarted,
+      null,
+      message || 'The Meeting has already started'
+    );
+  }
+
+  public static wrap(error: unknown, message?: string): MeetingAlreadyStarted {
+    return new MeetingAlreadyStarted(MeetingErrors.MeetingAlreadyStarted, error, message);
   }
 }

@@ -12,6 +12,7 @@ import { MeetingAddress } from '@meetings/domain/MeetingAddress';
 import { UniqueID } from '@src/shared/domain/uniqueId';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import {
+  MeetingAlreadyStarted,
   MeetingNotFoundError,
   MeetingStartingDateInvalid,
   RemoteMeetingCannotHaveAddress,
@@ -21,6 +22,7 @@ import { EditMeetingRequest } from './EditMeetingRequest';
 type Response = Result<
   void,
   | MeetingNotFoundError
+  | MeetingAlreadyStarted
   | MeetingStartingDateInvalid
   | RemoteMeetingCannotHaveAddress
   | ForbiddenError
@@ -56,19 +58,22 @@ export class EditMeetingUseCase implements UseCase<EditMeetingRequest, Promise<R
     if (request.title) {
       const titleOrError = await MeetingTitle.create(request.title);
       if (titleOrError.isErr()) return Err(titleOrError.unwrapErr());
-      meeting.setTitle(titleOrError.unwrap());
+      const res = meeting.setTitle(titleOrError.unwrap());
+      if (res.isErr()) return Err(res.unwrapErr());
     }
 
     if (request.description) {
       const descOrError = await MeetingDescription.create(request.description);
       if (descOrError.isErr()) return Err(descOrError.unwrapErr());
-      meeting.setDescription(descOrError.unwrap());
+      const res = meeting.setDescription(descOrError.unwrap());
+      if (res.isErr()) return Err(res.unwrapErr());
     }
 
     if (request.category) {
       const categoryOrError = await MeetingCategory.create(request.category);
       if (categoryOrError.isErr()) return Err(categoryOrError.unwrapErr());
-      meeting.setCategory(categoryOrError.unwrap());
+      const res = meeting.setCategory(categoryOrError.unwrap());
+      if (res.isErr()) return Err(res.unwrapErr());
     }
 
     if (request.startsAt) {

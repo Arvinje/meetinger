@@ -27,6 +27,7 @@ export class EditMeetingController extends BaseController {
           return this.forbidden(error.toResponse);
 
         case AppErrors.ValidationError:
+        case MeetingErrors.MeetingAlreadyStarted:
         case MeetingErrors.MeetingStartingDateInvalid:
         case MeetingErrors.RemoteMeetingCannotHaveAddress:
           return this.unprocessableEntity(error.toResponse);

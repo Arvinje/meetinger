@@ -29,13 +29,12 @@ export class JoinMeetingController extends BaseController {
           return this.internalError<BaseErrorResponse>(error.toResponse);
 
         case AppErrors.ValidationError:
+        case MeetingErrors.MeetingFullyBooked:
+        case MeetingErrors.MeetingAlreadyStarted:
           return this.unprocessableEntity<BaseErrorResponse>(error.toResponse);
 
         case MeetingErrors.MeetingNotFoundError:
           return this.notFound<BaseErrorResponse>(error.toResponse);
-
-        case MeetingErrors.MeetingFullyBooked:
-          return this.unprocessableEntity<BaseErrorResponse>(error.toResponse);
 
         default:
           return this.internalError<BaseErrorResponse>(

@@ -9,6 +9,7 @@ import { UniqueID } from '@src/shared/domain/uniqueId';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { AttendeeRepo } from '@meetings/repos/AttendeeRepo';
 import {
+  MeetingAlreadyStarted,
   MeetingErrors,
   MeetingNotFoundError,
   OrganizerCannotLeaveError,
@@ -20,6 +21,7 @@ type Response = Result<
   void,
   | MeetingNotFoundError
   | AttendeeNotFoundError
+  | MeetingAlreadyStarted
   | OrganizerCannotLeaveError
   | ValidationError
   | UnexpectedError

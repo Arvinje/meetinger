@@ -30,16 +30,13 @@ export class LeaveMeetingController extends BaseController {
           return this.internalError<BaseErrorResponse>(error.toResponse);
 
         case AppErrors.ValidationError:
+        case MeetingErrors.OrganizerCannotLeaveError:
+        case MeetingErrors.MeetingAlreadyStarted:
           return this.unprocessableEntity<BaseErrorResponse>(error.toResponse);
 
         case MeetingErrors.MeetingNotFoundError:
-          return this.notFound<BaseErrorResponse>(error.toResponse);
-
         case AttendeeErrors.AttendeeNotFoundError:
           return this.notFound<BaseErrorResponse>(error.toResponse);
-
-        case MeetingErrors.OrganizerCannotLeaveError:
-          return this.unprocessableEntity<BaseErrorResponse>(error.toResponse);
 
         default:
           return this.internalError<BaseErrorResponse>(

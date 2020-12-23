@@ -6,12 +6,20 @@ import { UserName } from '@users/domain/UserName';
 import { MeetingRepo } from '@meetings/repos/MeetingRepo';
 import { Meeting } from '@meetings/domain/Meeting';
 import { MeetingID } from '@meetings/domain/MeetingID';
-import { MeetingNotFoundError, MeetingFullyBooked } from '@meetings/errors/MeetingErrors';
+import {
+  MeetingNotFoundError,
+  MeetingFullyBooked,
+  MeetingAlreadyStarted,
+} from '@meetings/errors/MeetingErrors';
 import { JoinMeetingRequest } from './JoinMeetingRequest';
 
 type Response = Result<
   void,
-  MeetingNotFoundError | MeetingFullyBooked | ValidationError | UnexpectedError
+  | MeetingNotFoundError
+  | MeetingAlreadyStarted
+  | MeetingFullyBooked
+  | ValidationError
+  | UnexpectedError
 >;
 
 export class JoinMeetingUseCase implements UseCase<JoinMeetingRequest, Promise<Response>> {
