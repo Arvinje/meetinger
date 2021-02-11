@@ -4,6 +4,7 @@
     "plugin:jest/all",
     "plugin:import/errors",
     "plugin:import/warnings",
+    "plugin:jest/recommended",
     "plugin:import/typescript",
     "plugin:@typescript-eslint/recommended",
     // Prettier rules should always be the last item to override conflicting rules
@@ -33,7 +34,13 @@
       "ignoreUrls": true,
       "ignoreStrings": true,
       "ignoreTemplateLiterals": true
-    }]
+    }],
+    "jest/lowercase-name": [
+      "error",
+      {
+        "ignoreTopLevelDescribe": true
+      }
+    ]
   },
   "parser": "@typescript-eslint/parser",
   "env": {},
