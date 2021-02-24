@@ -21,7 +21,7 @@ import {
   RemoteMeetingCannotHaveAddress,
 } from '@meetings/errors/MeetingErrors';
 
-describe('Meeting Domain Object', () => {
+describe('Meeting AggregateRoot', () => {
   describe('create new meeting', () => {
     it('should create a new valid remote meeting given all args', async () => {
       expect.hasAssertions();

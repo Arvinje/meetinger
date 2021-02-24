@@ -18,14 +18,6 @@ export abstract class BaseError extends WError {
 
     this.id = uuidv4();
     this.type = type;
-
-    // eslint-disable-next-line no-console
-    console.error(this);
-
-    // // eslint-disable-next-line no-console
-    // console.error(`[${this.type}]: ${this.message}`);
-    // // eslint-disable-next-line no-console
-    // if (error) console.error(error);
   }
 
   protected get getBaseResponse(): BaseErrorResponse {
