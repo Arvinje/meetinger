@@ -1,7 +1,7 @@
 import faker from '@tests/support/faker';
 import { Attendees } from '@meetings/domain/Attendees';
 import { ValidationError } from '@src/shared/core/AppError';
-import { UserName } from '@src/modules/users/domain/UserName';
+import { UserName } from '@users/domain/UserName';
 
 describe('Attendees Value Object', () => {
   describe('create new Attendees', () => {
