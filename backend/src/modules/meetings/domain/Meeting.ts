@@ -92,8 +92,8 @@ export class Meeting extends AggregateRoot<MeetingProps> {
     return this.props.createdBy;
   }
 
-  get createdAt(): UserName {
-    return this.props.createdBy;
+  get createdAt(): Date {
+    return this.props.createdAt;
   }
 
   // eslint-disable-next-line no-useless-constructor
