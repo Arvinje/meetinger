@@ -9,7 +9,7 @@ interface MeetingRemainingSeatsProps {
 
 type Response = Result<MeetingRemainingSeats, ValidationError | UnexpectedError>;
 
-const schema = Joi.number().required().integer().min(0);
+const schema = Joi.number().strict(true).required().integer().min(0);
 
 export class MeetingRemainingSeats extends ValueObject<MeetingRemainingSeatsProps> {
   get value(): number {
