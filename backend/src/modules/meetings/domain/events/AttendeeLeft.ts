@@ -11,8 +11,6 @@ export class AttendeeLeft implements DomainEvent {
 
   public readonly username: UserName;
 
-  public readonly isOrganizer: boolean;
-
   constructor(meeting: Meeting, username: UserName) {
     this.createdAt = new Date();
     this.meeting = meeting;
