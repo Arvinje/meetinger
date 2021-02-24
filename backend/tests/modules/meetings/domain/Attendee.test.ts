@@ -1,10 +1,10 @@
 import faker from '@tests/support/faker';
-import { UserName } from '@src/modules/users/domain/UserName';
-import { UserFullName } from '@src/modules/users/domain/UserFullName';
-import { MeetingID } from '@src/modules/meetings/domain/MeetingID';
+import { UserName } from '@users/domain/UserName';
+import { UserFullName } from '@users/domain/UserFullName';
+import { MeetingID } from '@meetings/domain/MeetingID';
 import dayjs from 'dayjs';
-import { Attendee } from '@src/modules/meetings/domain/Attendee';
-import { MeetingTitle } from '@src/modules/meetings/domain/MeetingTitle';
+import { Attendee } from '@meetings/domain/Attendee';
+import { MeetingTitle } from '@meetings/domain/MeetingTitle';
 
 describe('Attendee AggregateRoot', () => {
   describe('create a new Attendee', () => {
