@@ -3,8 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - $default-branch
-      - complete-tests
+      - master
 
 jobs:
   BuildAndTest:
