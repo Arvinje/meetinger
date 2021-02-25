@@ -1,11 +1,11 @@
 terraform {
   backend "s3" {
-    bucket          = "terraform-state-meetinger-dev"
-    key             = "global/s3/terraform.tfstate"
-    region          = "eu-central-1"
+    bucket = "terraform-state-meetinger-dev"
+    key    = "global/s3/terraform.tfstate"
+    region = "eu-central-1"
 
-    dynamodb_table  = "terraform-state-meetinger-dev"
-    encrypt         = true
+    dynamodb_table = "terraform-state-meetinger-dev"
+    encrypt        = true
   }
 }
 

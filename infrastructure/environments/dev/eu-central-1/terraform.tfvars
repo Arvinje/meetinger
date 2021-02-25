@@ -1,2 +1,2 @@
-project_name    = "meetinger"
-dev_stage       = "dev"
+project_name = "meetinger"
+dev_stage    = "dev"
