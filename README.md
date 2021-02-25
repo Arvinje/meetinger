@@ -1,4 +1,7 @@
 # Meetinger
+
+[![CI](https://github.com/Arvinje/meetinger/actions/workflows/CI.yml/badge.svg)](https://github.com/Arvinje/meetinger/actions/workflows/CI.yml)
+
 > A Serverless Meetup management app, built with TypeScript to showcase Domain-Driven Design (DDD), Clean Architecture & SOLID best practices.
 
 This started as an exercise for me to practice the principles of Domain-Driven Design in a TypeScript-written app. Additionally, I tried to up my game in DynamoDB single table design.
