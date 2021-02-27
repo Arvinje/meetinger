@@ -1,9 +1,7 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - master
+  - push
 
 jobs:
   BuildAndTest:
@@ -35,7 +33,7 @@ jobs:
             ${{ runner.os }}-yarn-
       
       - name: Install dependencies
-        run: yarn --cwd ./backend install --frozen-lockfile
+        run: yarn --cwd ./backend install --frozen-lockfile --prefer-offline
       
       - name: Lint the code base
         run: yarn --cwd ./backend run lint
