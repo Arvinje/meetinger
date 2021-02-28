@@ -20,6 +20,8 @@ export class OnAttendeeJoined implements EventListener {
     const payload: AttendeeJoinedEvent = {
       username: event.username.value,
       meetingID: event.meeting.id.id.toString(),
+      meetingTitle: event.meeting.title.value,
+      meetingStartsAt: event.meeting.startsAt,
       joinedMeetingOn: event.createdAt,
       isOrganizer: event.isOrganizer,
     };

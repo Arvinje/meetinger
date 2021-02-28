@@ -22,3 +22,10 @@ module "sns_topics" {
   PROJECT_NAME = var.project_name
   ENVIRONMENT  = var.dev_stage
 }
+
+module "ses_templates" {
+  source = "../../../modules/ses"
+
+  PROJECT_NAME = var.project_name
+  ENVIRONMENT  = var.dev_stage
+}

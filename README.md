@@ -12,6 +12,8 @@ This started as an exercise for me to practice the principles of Domain-Driven D
 - DynamoDB as the primary database, with a single table design from the start
 - Infrastructure configured via Terraform (IaC)
 - Amazon Cognito for authentication
+- AWS SNS as the message broker service
+- AWS SES for transactional emails
 
 ## How to deploy
 First start by deploying the infrastructure using Terraform. In `infrastructure` directory, under the desired environment sub directory, simple run:
