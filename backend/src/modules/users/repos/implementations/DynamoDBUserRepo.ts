@@ -63,7 +63,7 @@ export class DynamoDBUserRepo implements UserRepo {
         })
         .promise();
 
-      const email = (await UserEmail.create(Item.GSI1PK.S)).unwrap();
+      const email = (await UserEmail.create(Item.GSI1PK.S.split('#')[1])).unwrap();
       const joinedOn = new Date(Item.JoinedOn.S);
       const fullName = (await UserFullName.create(Item.FullName.S)).unwrap();
       const introduction = (await UserIntroduction.create('')).unwrap();
