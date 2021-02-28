@@ -16,13 +16,13 @@ This started as an exercise for me to practice the principles of Domain-Driven D
 - AWS SES for transactional emails
 
 ## How to deploy
-First start by deploying the infrastructure using Terraform. In `infrastructure` directory, under the desired environment sub directory, simple run:
+First start by deploying the infrastructure using Terraform. In `infrastructure` directory, under the desired environment sub directory, simply run:
 
-`terraform apply`
+`terraform init && terraform apply`
 
 The Serverless stack can be deployed similarly by running `sls deploy` in `backend` directory.
 
-## Road map
+## Roadmap
 The work on this project is not done yet. Here are some things that I consider to implement in the future:
 
 - [ ] Better error messages
