@@ -13,8 +13,7 @@ describe('User Domain Object', () => {
       const username = (await UserName.create(faker.random.alphaNumeric(15))).unwrap();
       const email = (await UserEmail.create(faker.internet.email())).unwrap();
       const fullName = (await UserFullName.create(faker.name.findName())).unwrap();
-      const introduction = (await UserIntroduction.create(faker.lorem.paragraph(2))).unwrap();
-
+      const introduction = (await UserIntroduction.create(faker.lorem.paragraph(1))).unwrap();
       const joinedOn = new Date();
       const validUser = User.create({
         username,
