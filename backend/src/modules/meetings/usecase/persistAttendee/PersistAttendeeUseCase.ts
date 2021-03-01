@@ -55,6 +55,7 @@ export class PersistAttendeeUseCase implements UseCase<AttendeeJoinedEvent, Prom
       username,
       meetingID,
       fullName: user.fullName,
+      email: user.email,
       joinedMeetingOn: payload.joinedMeetingOn,
       meetingStartsAt: meeting.startsAt,
       meetingTitle: meeting.title,

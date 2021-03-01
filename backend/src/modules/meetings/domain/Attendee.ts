@@ -3,11 +3,13 @@ import { UniqueID } from '@src/shared/domain/uniqueId';
 import { UserName } from '@users/domain/UserName';
 import { UserFullName } from '@users/domain/UserFullName';
 import { AggregateRoot } from '@src/shared/domain/AggregateRoot';
+import { UserEmail } from '@src/modules/users/domain/UserEmail';
 import { MeetingID } from './MeetingID';
 import { MeetingTitle } from './MeetingTitle';
 
 export interface AttendeeProps {
   username: UserName;
+  email: UserEmail;
   fullName: UserFullName;
   meetingID: MeetingID;
   joinedMeetingOn: Date;
@@ -19,6 +21,10 @@ export interface AttendeeProps {
 export class Attendee extends AggregateRoot<AttendeeProps> {
   get username(): UserName {
     return this.props.username;
+  }
+
+  get email(): UserEmail {
+    return this.props.email;
   }
 
   get fullName(): UserFullName {

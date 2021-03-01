@@ -5,11 +5,14 @@ import { UniqueID } from '@src/shared/domain/uniqueId';
 import { UserName } from '@users/domain/UserName';
 import { MeetingID } from '@meetings/domain/MeetingID';
 import { MeetingTitle } from '@meetings/domain/MeetingTitle';
+import { UserEmail } from '@src/modules/users/domain/UserEmail';
 
 export class AttendeeMap {
   public static async dynamoToDomain(raw: AttributeMap): Promise<Attendee> {
     const rawUserName = raw.GSI1PK?.S.split('#')[0] || raw.SK?.S.split('#')[1];
     const username = (await UserName.create(rawUserName)).unwrap();
+
+    const email = (await UserEmail.create(raw.Email.S)).unwrap();
 
     const rawMeetingID = raw.PK.S.split('#')[0];
     const meetingID = MeetingID.create(new UniqueID(rawMeetingID));
@@ -22,6 +25,7 @@ export class AttendeeMap {
 
     return Attendee.create({
       username,
+      email,
       meetingID,
       joinedMeetingOn,
       fullName,
@@ -41,6 +45,7 @@ export class AttendeeMap {
       GSI2SK: { S: attendee.joinedMeetingOn.toISOString() },
       Title: { S: attendee.meetingTitle.value },
       FullName: { S: attendee.fullName.value },
+      Email: { S: attendee.email.value },
       IsOrganizer: { BOOL: attendee.isOrganizer },
       Version: { N: version.toString() },
     };

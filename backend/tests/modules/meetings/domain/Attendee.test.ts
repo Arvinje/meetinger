@@ -5,6 +5,7 @@ import { MeetingID } from '@meetings/domain/MeetingID';
 import dayjs from 'dayjs';
 import { Attendee } from '@meetings/domain/Attendee';
 import { MeetingTitle } from '@meetings/domain/MeetingTitle';
+import { UserEmail } from '@src/modules/users/domain/UserEmail';
 
 describe('Attendee AggregateRoot', () => {
   describe('create a new Attendee', () => {
@@ -12,6 +13,7 @@ describe('Attendee AggregateRoot', () => {
       expect.hasAssertions();
 
       const username = (await UserName.create(faker.random.alphaNumeric(6))).unwrap();
+      const email = (await UserEmail.create(faker.internet.email())).unwrap();
       const fullName = (await UserFullName.create(faker.name.findName())).unwrap();
       const meetingID = MeetingID.create();
       const joinedMeetingOn = dayjs().subtract(1, 'minute').toDate();
@@ -22,6 +24,7 @@ describe('Attendee AggregateRoot', () => {
       const attendeeRes = Attendee.create({
         username,
         fullName,
+        email,
         meetingID,
         joinedMeetingOn,
         meetingStartsAt,
@@ -31,6 +34,7 @@ describe('Attendee AggregateRoot', () => {
       expect(attendeeRes.isErr()).toBe(false);
       expect(attendeeRes.unwrap()).toBeInstanceOf(Attendee);
       expect(attendeeRes.unwrap().username).toBe(username);
+      expect(attendeeRes.unwrap().email).toBe(email);
       expect(attendeeRes.unwrap().fullName).toBe(fullName);
       expect(attendeeRes.unwrap().meetingID).toBe(meetingID);
       expect(attendeeRes.unwrap().joinedMeetingOn).toBe(joinedMeetingOn);
@@ -43,6 +47,7 @@ describe('Attendee AggregateRoot', () => {
       expect.hasAssertions();
 
       const username = (await UserName.create(faker.random.alphaNumeric(6))).unwrap();
+      const email = (await UserEmail.create(faker.internet.email())).unwrap();
       const fullName = (await UserFullName.create(faker.name.findName())).unwrap();
       const meetingID = MeetingID.create();
       const joinedMeetingOn = dayjs().subtract(1, 'minute').toDate();
@@ -51,6 +56,7 @@ describe('Attendee AggregateRoot', () => {
 
       const attendeeRes = Attendee.create({
         username,
+        email,
         fullName,
         meetingID,
         joinedMeetingOn,
@@ -74,6 +80,7 @@ describe('Attendee AggregateRoot', () => {
       expect.hasAssertions();
 
       const username = (await UserName.create(faker.random.alphaNumeric(6))).unwrap();
+      const email = (await UserEmail.create(faker.internet.email())).unwrap();
       const fullName = (await UserFullName.create(faker.name.findName())).unwrap();
       const meetingID = MeetingID.create();
       const joinedMeetingOn = dayjs().subtract(1, 'minute').toDate();
@@ -83,6 +90,7 @@ describe('Attendee AggregateRoot', () => {
 
       const attendee = Attendee.create({
         username,
+        email,
         fullName,
         meetingID,
         joinedMeetingOn,
@@ -103,6 +111,7 @@ describe('Attendee AggregateRoot', () => {
       expect.hasAssertions();
 
       const username = (await UserName.create(faker.random.alphaNumeric(6))).unwrap();
+      const email = (await UserEmail.create(faker.internet.email())).unwrap();
       const fullName = (await UserFullName.create(faker.name.findName())).unwrap();
       const meetingID = MeetingID.create();
       const joinedMeetingOn = dayjs().subtract(1, 'minute').toDate();
@@ -112,6 +121,7 @@ describe('Attendee AggregateRoot', () => {
 
       const attendee = Attendee.create({
         username,
+        email,
         fullName,
         meetingID,
         joinedMeetingOn,
