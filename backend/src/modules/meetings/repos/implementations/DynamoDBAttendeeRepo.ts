@@ -143,7 +143,34 @@ export class DynamoDBAttendeeRepo implements AttendeeRepo {
     ];
   }
 
-  async fetchAllByMeetingID(meetingID: MeetingID): Promise<AttendeeDetails[]> {
+  async fetchAllByMeetingID(meetingID: MeetingID): Promise<Attendee[]> {
+    const input: QueryInput = {
+      TableName: this.tables.MainTable,
+      KeyConditionExpression: '#PK = :PK',
+      ExpressionAttributeNames: {
+        '#PK': 'PK',
+      },
+      ExpressionAttributeValues: {
+        ':PK': {
+          S: `${meetingID.id.toString()}#ATTENDEES`,
+        },
+      },
+    };
+
+    let queryResult: QueryOutput;
+    try {
+      queryResult = await this.client.query(input).promise();
+    } catch (error) {
+      throw UnexpectedError.wrap(
+        error,
+        `Failed to fetch attendees of meeting(${meetingID.id.toString()})`
+      );
+    }
+
+    return Promise.all(queryResult.Items.map((item) => AttendeeMap.dynamoToDomain(item)));
+  }
+
+  async fetchAllDetailsByMeetingID(meetingID: MeetingID): Promise<AttendeeDetails[]> {
     const input: QueryInput = {
       TableName: this.tables.MainTable,
       Limit: 12,

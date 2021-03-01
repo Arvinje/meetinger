@@ -8,5 +8,6 @@ export interface AttendeeRepo {
   remove(username: UserName, meetingID: MeetingID): Promise<void>;
   exists(username: UserName, meetingID: MeetingID): Promise<boolean>;
   fetch(username: UserName, meetingID: MeetingID): Promise<[Attendee, number]>;
-  fetchAllByMeetingID(meetingID: MeetingID): Promise<AttendeeDetails[]>;
+  fetchAllByMeetingID(meetingID: MeetingID): Promise<Attendee[]>;
+  fetchAllDetailsByMeetingID(meetingID: MeetingID): Promise<AttendeeDetails[]>;
 }

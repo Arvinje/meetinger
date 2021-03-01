@@ -32,7 +32,7 @@ export class GetMeetingUseCase implements UseCase<GetMeetingRequest, Promise<Res
     try {
       [[meeting], attendees] = await Promise.all<[Meeting, number], AttendeeDetails[]>([
         this.meetingRepo.fetchMeetingByID(meetingID),
-        this.attendeeRepo.fetchAllByMeetingID(meetingID),
+        this.attendeeRepo.fetchAllDetailsByMeetingID(meetingID),
       ]);
     } catch (error) {
       if (error instanceof MeetingNotFoundError) return Err(error);
