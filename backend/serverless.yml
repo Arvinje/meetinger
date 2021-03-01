@@ -244,7 +244,19 @@ functions:
     handler: src/modules/meetings/usecase/emailJoinedAttendee/index.handler
     environment:
       MAIN_TABLE_NAME: ${self:custom.mainTableName}
-      SOURCE_EMAIL_ADDRESS: ${env:NOREPLY_EMAIL_ADDRESS}
+      EMAILS_TO_SEND_SQS_QUEUE_URL: ${ssm:/sqs/${self:service}/${self:provider.stage}/EmailsToSendQueue_url~true}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sqs:SendMessage
+        Resource: ${ssm:/sqs/${self:service}/${self:provider.stage}/EmailsToSendQueue_arn~true}
+    events:
+      - sns: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeJoined_arn~true}
+  
+  EmailSender:
+    handler: src/modules/meetings/usecase/emailSender/index.handler
+    environment:
+      SOURCE_EMAIL_DOMAIN: ${env:SOURCE_EMAIL_DOMAIN}
       ATTENDEE_JOINED_SES_TEMPLATE: ${self:service}-${self:provider.stage}-AttendeeJoined
     iamRoleStatements:
       - Effect: Allow
@@ -252,4 +264,4 @@ functions:
           - ses:SendTemplatedEmail
         Resource: '*'
     events:
-      - sns: ${ssm:/sns/${self:service}/${self:provider.stage}/AttendeeJoined_arn~true}
+      - sqs: ${ssm:/sqs/${self:service}/${self:provider.stage}/EmailsToSendQueue_arn~true}

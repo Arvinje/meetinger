@@ -6,18 +6,19 @@ import { AttendeeJoinedEvent } from '@meetings/integrationEvents/AttendeeJoinedE
 import { UserName } from '@users/domain/UserName';
 import { UserRepo } from '@users/repos/UserRepo';
 import { User } from '@users/domain/User';
-import { EmailService } from '@src/shared/infra/emailService/EmailService';
 import { AttendeeJoinedEmail } from '@meetings/emails/AttendeeJoinedEmail';
+import { JobQueue } from '@src/shared/infra/queues/JobQueue';
+import { EmailMessage } from '@src/shared/infra/emailService/EmailMessage';
 
 type Response = Result<void, UnexpectedError>;
 
 export class EmailJoinedAttendeeUseCase implements UseCase<AttendeeJoinedEvent, Promise<Response>> {
-  private emailService: EmailService;
+  private jobQueue: JobQueue;
 
   private userRepo: UserRepo;
 
-  constructor(emailService: EmailService, userRepo: UserRepo) {
-    this.emailService = emailService;
+  constructor(jobQueue: JobQueue, userRepo: UserRepo) {
+    this.jobQueue = jobQueue;
     this.userRepo = userRepo;
   }
 
@@ -36,8 +37,15 @@ export class EmailJoinedAttendeeUseCase implements UseCase<AttendeeJoinedEvent, 
       meetingTitle: payload.meetingTitle,
     };
 
+    const emailMessage: EmailMessage = {
+      sender: 'no-reply',
+      template: 'AttendeeJoined',
+      templateData: JSON.stringify(emailPayload),
+      toAddresses: [user.email.value],
+    };
+
     try {
-      await this.emailService.send('AttendeeJoined', user.email, emailPayload);
+      await this.jobQueue.send('EmailsToSend', JSON.stringify(emailMessage));
       return Ok(undefined);
     } catch (error) {
       return Err(UnexpectedError.wrap(error));

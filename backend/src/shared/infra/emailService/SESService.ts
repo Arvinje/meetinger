@@ -1,7 +1,7 @@
-import { UserEmail } from '@users/domain/UserEmail';
 import { UnexpectedError } from '@src/shared/core/AppError';
 import SESClient, { SendTemplatedEmailRequest } from 'aws-sdk/clients/ses';
 import { EmailService } from './EmailService';
+import { EmailMessage } from './EmailMessage';
 
 interface EmailTemplates {
   AttendeeJoined: string;
@@ -13,43 +13,48 @@ export const Templates: EmailTemplates = {
 
 interface Config {
   Client: SESClient;
-  Source: string;
+  SourceEmailDomain: string;
   Templates: EmailTemplates;
 }
 
 export const SESConfig: Config = {
   Client: new SESClient(),
-  Source: process.env.SOURCE_EMAIL_ADDRESS,
+  SourceEmailDomain: process.env.SOURCE_EMAIL_DOMAIN,
   Templates,
 };
 
 export class SESService implements EmailService {
   private client: SESClient;
 
-  private source: string;
+  private sourceEmailDomain: string;
 
   private templates: EmailTemplates;
 
   constructor(config: Config) {
     this.client = config.Client;
-    this.source = config.Source;
+    this.sourceEmailDomain = config.SourceEmailDomain;
     this.templates = config.Templates;
   }
 
-  async send(template: string, toAddress: UserEmail, payload: unknown): Promise<void> {
+  async send(message: EmailMessage): Promise<void> {
+    const template = this.templates[message.template];
+    if (template === undefined) {
+      throw UnexpectedError.create(`the template (${message.template}) is not valid`);
+    }
+
     const request: SendTemplatedEmailRequest = {
-      Source: this.source,
+      Source: `${message.sender}@${this.sourceEmailDomain}`,
       Destination: {
-        ToAddresses: [toAddress.value],
+        ToAddresses: message.toAddresses,
       },
-      Template: this.templates[template],
-      TemplateData: JSON.stringify(payload),
+      Template: template,
+      TemplateData: message.templateData,
     };
 
     try {
       await this.client.sendTemplatedEmail(request).promise();
     } catch (error) {
-      throw UnexpectedError.wrap(error, `failed to send ${template} email`);
+      throw UnexpectedError.wrap(error, `failed to send ${message.template} email`);
     }
   }
 }

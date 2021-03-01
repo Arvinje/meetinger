@@ -1,10 +1,5 @@
-import { AttendeeJoinedEmail } from '@meetings/emails/AttendeeJoinedEmail';
-import { UserEmail } from '@users/domain/UserEmail';
+import { EmailMessage } from './EmailMessage';
 
 export interface EmailService {
-  send(
-    template: 'AttendeeJoined',
-    toAddress: UserEmail,
-    payload: AttendeeJoinedEmail
-  ): Promise<void>;
+  send(message: EmailMessage): Promise<void>;
 }

@@ -23,8 +23,8 @@ module "sns_topics" {
   ENVIRONMENT  = var.dev_stage
 }
 
-module "ses_templates" {
-  source = "../../../modules/ses"
+module "email_sender" {
+  source = "../../../modules/email_sender"
 
   PROJECT_NAME = var.project_name
   ENVIRONMENT  = var.dev_stage
