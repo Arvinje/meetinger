@@ -1,0 +1,295 @@
+{
+  "ModelName": "Meetinger",
+  "ModelMetadata": {
+    "Author": "Arvin Jenabi",
+    "DateCreated": "Jul 07, 2020, 01:30 AM",
+    "DateLastModified": "Mar 09, 2021, 10:14 PM",
+    "Description": "",
+    "Version": "2.0",
+    "AWSService": "Amazon DynamoDB"
+  },
+  "DataModel": [
+    {
+      "TableName": "Main",
+      "KeyAttributes": {
+        "PartitionKey": {
+          "AttributeName": "PK",
+          "AttributeType": "S"
+        },
+        "SortKey": {
+          "AttributeName": "SK",
+          "AttributeType": "S"
+        }
+      },
+      "NonKeyAttributes": [
+        {
+          "AttributeName": "GSI1PK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GSI1SK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GSI2PK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "GSI2SK",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Title",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "JoinedOn",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Introduction",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "FullName",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "AvailableSeats",
+          "AttributeType": "N"
+        },
+        {
+          "AttributeName": "Description",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Attendees",
+          "AttributeType": "SS"
+        },
+        {
+          "AttributeName": "RemainingSeats",
+          "AttributeType": "N"
+        },
+        {
+          "AttributeName": "Version",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Email",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "IsOrganizer",
+          "AttributeType": "BOOL"
+        },
+        {
+          "AttributeName": "Username",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "Address",
+          "AttributeType": "S"
+        }
+      ],
+      "GlobalSecondaryIndexes": [
+        {
+          "IndexName": "GSI1",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "GSI1PK",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "GSI1SK",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        },
+        {
+          "IndexName": "GSI2",
+          "KeyAttributes": {
+            "PartitionKey": {
+              "AttributeName": "GSI2PK",
+              "AttributeType": "S"
+            },
+            "SortKey": {
+              "AttributeName": "GSI2SK",
+              "AttributeType": "S"
+            }
+          },
+          "Projection": {
+            "ProjectionType": "ALL"
+          }
+        }
+      ],
+      "TableData": [
+        {
+          "PK": {
+            "S": "USER#arvinje"
+          },
+          "SK": {
+            "S": "META"
+          },
+          "GSI1PK": {
+            "S": "USER#arvinje@arvinjenabi.com"
+          },
+          "GSI1SK": {
+            "S": "META"
+          },
+          "JoinedOn": {
+            "S": "2021-02-04T13:53:30+00:00"
+          },
+          "FullName": {
+            "S": "Arvin Jenabi"
+          },
+          "Version": {
+            "S": "1"
+          }
+        },
+        {
+          "PK": {
+            "S": "USER#johndoe"
+          },
+          "SK": {
+            "S": "META"
+          },
+          "GSI1PK": {
+            "S": "USER#john@doe.com"
+          },
+          "GSI1SK": {
+            "S": "META"
+          },
+          "JoinedOn": {
+            "S": "2021-01-05T07:43:36+00:00"
+          },
+          "FullName": {
+            "S": "John Doe"
+          },
+          "Version": {
+            "S": "1"
+          }
+        },
+        {
+          "PK": {
+            "S": "wLnnMe1XFvAleTXmDPSCv"
+          },
+          "SK": {
+            "S": "META"
+          },
+          "GSI1PK": {
+            "S": "Finland, Tampere#2021-06#Meetings"
+          },
+          "GSI1SK": {
+            "S": "Social#2021-03-09T19:11:53+00:00"
+          },
+          "GSI2PK": {
+            "S": "arvinje#MEETINGS"
+          },
+          "GSI2SK": {
+            "S": "2021-03-09T19:11:53+00:00"
+          },
+          "Title": {
+            "S": "The Pandemic's Over Folks!"
+          },
+          "AvailableSeats": {
+            "N": "50"
+          },
+          "Description": {
+            "S": "This is a gathering of all those people who are finally exiting their caves of solitude! Be at the venue on time!"
+          },
+          "Attendees": {
+            "SS": [
+              "arvinje",
+              "johndoe"
+            ]
+          },
+          "RemainingSeats": {
+            "N": "48"
+          },
+          "Version": {
+            "S": "5"
+          },
+          "Address": {
+            "S": "Koskipuisto"
+          }
+        },
+        {
+          "PK": {
+            "S": "wLnnMe1XFvAleTXmDPSCv#ATTENDEES"
+          },
+          "SK": {
+            "S": "arvinje"
+          },
+          "GSI1PK": {
+            "S": "arvinje#MEETINGS"
+          },
+          "GSI1SK": {
+            "S": "2021-03-09T19:11:53+00:00"
+          },
+          "GSI2PK": {
+            "S": "wLnnMe1XFvAleTXmDPSCv"
+          },
+          "GSI2SK": {
+            "S": "2021-03-02T13:37:49+00:00"
+          },
+          "Title": {
+            "S": "The Pandemic's Over Folks!"
+          },
+          "FullName": {
+            "S": "Arvin Jenabi"
+          },
+          "Version": {
+            "S": "1"
+          },
+          "Email": {
+            "S": "arvinje@arvinjenabi.com"
+          },
+          "IsOrganizer": {
+            "BOOL": true
+          }
+        },
+        {
+          "PK": {
+            "S": "wLnnMe1XFvAleTXmDPSCv#ATTENDEES"
+          },
+          "SK": {
+            "S": "johndoe"
+          },
+          "GSI1PK": {
+            "S": "johndoe#MEETINGS"
+          },
+          "GSI1SK": {
+            "S": "2021-03-09T19:11:53+00:00"
+          },
+          "GSI2PK": {
+            "S": "wLnnMe1XFvAleTXmDPSCv"
+          },
+          "GSI2SK": {
+            "S": "2021-03-02T15:37:49+00:00"
+          },
+          "Title": {
+            "S": "The Pandemic's Over Folks!"
+          },
+          "FullName": {
+            "S": "John Doe"
+          },
+          "Version": {
+            "S": "1"
+          },
+          "Email": {
+            "S": "john@doe.com"
+          },
+          "IsOrganizer": {
+            "BOOL": false
+          }
+        }
+      ],
+      "DataAccess": {
+        "MySql": {}
+      }
+    }
+  ]
+}

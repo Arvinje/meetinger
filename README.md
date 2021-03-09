@@ -26,6 +26,9 @@ The Serverless stack can be deployed similarly by running `sls deploy` in `backe
 ## Testing
 Simply run `yarn test` in the `backend` directory to run all automated tests. This code base utilizes auto-generated fake data for testing using Faker.js. Faker.js supports configurable seed number which can be used to achieve consistent result. You can use `FAKER_SEED` environment variable to set your own seed. e.g. `FAKER_SEED=123 yarn test`
 
+## DynamoDB Data Model
+For more information on the data model, including examples, refer to the [DynamoDB Table Design document.](dynamodb)
+
 ## Roadmap
 The work on this project is not done yet. Here are some things that I consider to implement in the future:
 
